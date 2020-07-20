@@ -77,79 +77,73 @@ class MainSortPageState extends State<MainSortPage>
           SliverAppBar(
             pinned: true,
             floating: true,
-            expandedHeight: 200,
+            expandedHeight: 0,
             flexibleSpace: FlexibleSpaceBar(
               background: buildBanner(),
             ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  Icons.add_circle,
-                ),
-                onPressed: () {
-                  print("点击了加号");
-                },
-              )
-            ],
-            title: Material(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(6)),
-              child: Ink(
-                child: InkWell(
-                  onTap: () {
-                    print("点击了搜索框");
-                  },
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
-                  splashColor: Colors.grey[100],
-                  child: Container(
-                    height: 33,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: Icon(
-                            Icons.search,
-                            size: 18,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        Expanded(
-                          flex: 5,
-                          child: Text(
-                            "搜索",
-                            style: TextStyle(
-                                fontSize: 14, color: Colors.grey[600]),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.settings_voice,
-                              size: 16,
-                              color: Colors.grey[600],
-                            ),
-                            onPressed: () {
-                              print("点击了语音按钮");
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+//            actions: [IconButton(
+//                icon: Icon(
+//                  Icons.add_circle,
+//                ),
+//                onPressed: () {
+//                  print("点击了加号");
+//                },
+//              )
+//            ],
+//            title: Material(
+//              color: Colors.white,
+//              borderRadius: BorderRadius.all(Radius.circular(6)),
+//              child: Ink(
+//                child: InkWell(
+//                  onTap: () {
+//                    print("点击了搜索框");
+//                  },
+//                  borderRadius: BorderRadius.all(Radius.circular(6)),
+//                  splashColor: Colors.grey[100],
+//                  child: Container(
+//                    height: 33,
+//                    child: Row(
+//                      children: [
+//                        Expanded(
+//                          flex: 1,
+//                          child: Icon(
+//                            Icons.search,
+//                            size: 18,
+//                            color: Colors.grey[600],
+//                          ),
+//                        ),
+//                        Expanded(
+//                          flex: 5,
+//                          child: Text(
+//                            "搜索",
+//                            style: TextStyle(
+//                                fontSize: 14, color: Colors.grey[600]),
+//                          ),
+//                        ),
+//                        Expanded(
+//                          flex: 1,
+//                          child: IconButton(
+//                            icon: Icon(
+//                              Icons.settings_voice,
+//                              size: 16,
+//                              color: Colors.grey[600],
+//                            ),
+//                            onPressed: () {
+//                              print("点击了语音按钮");
+//                            },
+//                          ),
+//                        ),
+//                      ],
+//                    ),
+//                  ),
+//                ),
+//              ),
+//            ),
             bottom: TabBar(
               isScrollable: true,
               controller: mTabController,
-              tabs: tabListTitle
-                  .map(
-                    (String title) => Tab(
-                      text: title,
-                    ),
-                  )
-                  .toList(),
+              tabs: tabListTitle.map((String title) =>
+                  Tab(text: title,),).toList(),
             ),
           )
         ];

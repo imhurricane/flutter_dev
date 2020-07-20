@@ -29,8 +29,8 @@ class HomeItemPageSortState extends State<HomeItemPageSort> {
 
   Widget buildListView() {
     return ListView.builder(
-        padding: EdgeInsets.only(
-          top: 0,
+        padding: EdgeInsets.all(
+          8,
         ),
         itemCount: 30,
         itemBuilder: (BuildContext context, int index) {

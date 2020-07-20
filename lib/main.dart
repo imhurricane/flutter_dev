@@ -1,13 +1,27 @@
 
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dev/view/index/index_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 
 
-void main() => runApp(new RootApp());
+void main() {
+  runApp(new RootApp());
+  if (Platform.isAndroid) {
+    SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+//        statusBarBrightness: Brightness.light,
+//        statusBarIconBrightness: Brightness.dark
+    );
+    SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
+
+    print("systemUiOverlayStyle");
+  }
+}
 
 class RootApp extends StatefulWidget{
   @override
@@ -34,6 +48,7 @@ class RootAppState extends State<RootApp> {
         const Locale("he","IL"),
         const Locale("zh","CH"),
       ],
+
     );
   }
 }

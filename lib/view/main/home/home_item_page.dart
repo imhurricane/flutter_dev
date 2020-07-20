@@ -1,13 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dev/comm/comm_utils.dart';
+import 'package:flutter_dev/http/address.dart';
+import 'package:flutter_dev/http/data_helper.dart';
+import 'package:flutter_dev/http/http_manager.dart';
+import 'package:flutter_dev/http/result_data.dart';
+import 'package:flutter_dev/router/route_util.dart';
+import 'package:flutter_dev/view/comm_views/list/CustomScrollViewTestRoute.dart';
+import 'package:flutter_dev/view/comm_views/list/comm_list_view.dart';
+import 'package:flutter_dev/view/main/home/grid_item.dart';
 import 'package:flutter_dev/view/main/home/item_home.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomeItemPage extends StatefulWidget {
-  final List<ItemHome> itemHomes;
-
-  HomeItemPage(this.itemHomes);
-
   @override
   State<StatefulWidget> createState() {
     return HomeItemPageState();
@@ -18,9 +25,49 @@ class HomeItemPageState extends State<HomeItemPage> {
 //  List<String> imageList = ["img0.jpg", "img1.jpg", "img2.jpg", "img3.jpg"];
   RefreshController mRefreshController = new RefreshController();
   ClassicFooter footer = new ClassicFooter();
+  List<ItemHome> itemHomes = new List();
+
+  List<EntryModel> entryModels = new List();
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    initData();
+  }
+
+  initData() async {
+    var baseMap = DataHelper.getBaseMap();
+    baseMap.clear();
+    baseMap['menuId'] = "xtrd_nav_app";
+//    baseMap['']="";
+    ResultData result =
+        await HttpManager.getInstance().get(Address.HOME_URL, baseMap);
+    if(result.code != 200){
+      CommUtils.showDialog(context, "提示", result.data, false,
+          okOnPress: () {});
+    }else{
+      Map<String, dynamic> json = jsonDecode(result.data);
+
+      ItemGrid itemGrid = ItemGrid.fromJson(json);
+      debugPrint("json:"+result.data);
+      entryModels = itemGrid.entryModels;
+      Map<String, String> gridItem = Map();
+      List<Map<String, String>> gridItems = new List<Map<String, String>>();
+      gridItems.add(gridItem);
+      ItemHome itemHome = ItemHome.grid(ViewType.gridView, gridItems);
+      itemHomes.clear();
+      itemHomes.add(itemHome);
+      setState(() {});
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
+    ///网络获取数据
+
     return Container(
       height: MediaQuery.of(context).size.height,
 //      padding: EdgeInsets.all(10),
@@ -43,13 +90,13 @@ class HomeItemPageState extends State<HomeItemPage> {
 
   Widget buildListView() {
     return ListView.builder(
-        itemCount: widget.itemHomes.length,
+        itemCount: itemHomes.length,
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
           return Container(
             color: Colors.grey[100],
-            child: buildItem(widget.itemHomes[index]),
+            child: buildItem(itemHomes[index]),
           );
         });
   }
@@ -62,7 +109,8 @@ class HomeItemPageState extends State<HomeItemPage> {
   }
 
   onRefresh() async {
-    Future.delayed(Duration(milliseconds: 3000), () {
+    Future.delayed(Duration(milliseconds: 500), () {
+      initData();
       mRefreshController.refreshCompleted();
     });
   }
@@ -84,7 +132,7 @@ class HomeItemPageState extends State<HomeItemPage> {
     return Container(
       margin: EdgeInsets.all(5),
       child: GridView.builder(
-          itemCount: 9,
+          itemCount: entryModels.length,
           primary: false,
           padding: EdgeInsets.all(0),
           shrinkWrap: true,
@@ -101,7 +149,7 @@ class HomeItemPageState extends State<HomeItemPage> {
               child: Ink(
                 child: InkWell(
                   onTap: () {
-                    print("sadas");
+                    RouteUtils.pushPage(context, CommListView(entryModels[index]));
                   },
                   child: Container(
                     child: Column(
@@ -109,17 +157,19 @@ class HomeItemPageState extends State<HomeItemPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Image.asset(
-                          "resources/images/logo.png",
+                        Image.network(
+                          "${Address.BaseImageURL + entryModels[index].icon}",
                           width: 44,
                           height: 44,
                           alignment: Alignment.center,
                         ),
                         Center(
                           child: Text(
-                            "测试",
+                            "${entryModels[index].title}",
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w500),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ],
@@ -135,7 +185,7 @@ class HomeItemPageState extends State<HomeItemPage> {
   buildMsgWidget() {
     return Card(
       color: Colors.white,
-      margin: EdgeInsets.only(top: 5,left: 10,right: 10),
+      margin: EdgeInsets.only(top: 5, left: 10, right: 10),
       elevation: 0,
       child: Container(
         padding: EdgeInsets.all(13),
