@@ -23,6 +23,13 @@ class MainPageState extends State<MainPage> {
   List<String> normalIcon = ["sy_01.png","fl_01.png","bk_01.png","mine_01.png"];
   List<String> selectIcon = ["sy_02.png","fl_02.png","bk_02.png","mine_02.png"];
   num selectIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -40,7 +40,7 @@ class HomeItemPageState extends State<HomeItemPage> {
   initData() async {
     var baseMap = DataHelper.getBaseMap();
     baseMap.clear();
-    baseMap['menuId'] = "xtrd_nav_app";
+    baseMap['menuId'] = "lnd";
 //    baseMap['']="";
     ResultData result =
         await HttpManager.getInstance().get(Address.HOME_URL, baseMap);

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/moudel/user_bean.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/login/login_page.dart';
@@ -35,7 +36,7 @@ class MainMinePageState extends State<MainMinePage> {
         children: [
           FlatButton(
             onPressed: () {
-              SpUtil.remove("userInfo");
+              StorageUtils.removeWithKey("userInfo");
               RouteUtils.pushReplacePage(context, LoginPage());
             },
             child: Text("退出登录"),

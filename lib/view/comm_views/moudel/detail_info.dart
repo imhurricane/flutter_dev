@@ -1,3 +1,4 @@
+import 'package:flutter_dev/view/comm_views/moudel/selects.dart';
 
 class DetailPageInfo {
   String detailPageId;
@@ -88,13 +89,13 @@ class ItemDetailButtons {
 
   ItemDetailButtons.fromJson(Map<String, dynamic> json) {
     if (json['itemDetailButtonTopRight'] != null) {
-      itemDetailButtonTopRight = new List<Null>();
+      itemDetailButtonTopRight = new List<ItemDetailButton>();
       json['itemDetailButtonTopRight'].forEach((v) {
         itemDetailButtonTopRight.add(new ItemDetailButton.fromJson(v));
       });
     }
     if (json['itemDetailButtonBottom'] != null) {
-      itemDetailButtonBottom = new List<Null>();
+      itemDetailButtonBottom = new List<ItemDetailButton>();
       json['itemDetailButtonBottom'].forEach((v) {
         itemDetailButtonBottom.add(new ItemDetailButton.fromJson(v));
       });
@@ -122,12 +123,16 @@ class ItemDetailColumns {
   String columnDes;
   String columnValue;
   String columnName;
+  List<Selects> selects;
+  int formatCode;
 
   ItemDetailColumns(
       {this.isReadOnlyCol,
       this.itemType,
       this.pageTitle,
       this.columnDes,
+      this.selects,
+      this.formatCode,
       this.columnValue,
       this.columnName});
 
@@ -138,6 +143,13 @@ class ItemDetailColumns {
     columnDes = json['columnDes'];
     columnValue = json['columnValue'];
     columnName = json['columnName'];
+    formatCode = json['formatCode'];
+    if (json['selects'] != null) {
+      selects = new List<Selects>();
+      json['selects'].forEach((v) {
+        selects.add(new Selects.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -148,6 +160,10 @@ class ItemDetailColumns {
     data['columnDes'] = this.columnDes;
     data['columnValue'] = this.columnValue;
     data['columnName'] = this.columnName;
+    data['formatCode'] = this.formatCode;
+    if (this.selects != null) {
+      data['selects'] = this.selects.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -160,7 +176,7 @@ class IconInfoList {
 
   IconInfoList.fromJson(Map<String, dynamic> json) {
     if (json['localMedia'] != null) {
-      localMedia = new List<Null>();
+      localMedia = new List<LocalMedia>();
       json['localMedia'].forEach((v) {
         localMedia.add(new LocalMedia.fromJson(v));
       });

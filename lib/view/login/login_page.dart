@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dev/comm/comm_utils.dart';
+import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/http/address.dart';
 import 'package:flutter_dev/http/data_helper.dart';
 import 'package:flutter_dev/http/http_manager.dart';
@@ -459,13 +459,11 @@ class LoginPageState extends State<LoginPage>
       result = await HttpManager.getInstance().get(Address.LOGIN_URL, baseMap);
 
       if (result.code == 200) {
-        /// 等待Sp初始化完成。
-        await SpUtil.getInstance();
         Map<String, dynamic> json = jsonDecode(result.data);
         LoginUser loginUser = LoginUser.fromJson(json);
-        if (loginUser.code == "1") {
+        if (loginUser.code.endsWith("1")) {
           currentStatus = ResultStatus.success;
-          SpUtil.putObject("userInfo", loginUser);
+          StorageUtils.saveModel("userInfo", loginUser);
           if(mounted){
             setState((){
 

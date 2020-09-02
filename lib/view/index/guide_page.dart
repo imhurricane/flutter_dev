@@ -1,6 +1,12 @@
+import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dev/comm/comm_utils.dart';
+import 'package:flutter_dev/comm/storage_utils.dart';
+import 'package:flutter_dev/moudel/user_bean.dart';
 import 'package:flutter_dev/router/route_util.dart';
+import 'package:flutter_dev/view/login/login_page.dart';
+import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:flutter_dev/view/main/root/main_page.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 
@@ -22,7 +28,7 @@ class GuidePageState extends State<GuidePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: new Swiper(
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (BuildContext context1, int index) {
           if (3 == index) {
             return Stack(
               children: [
@@ -72,7 +78,12 @@ class GuidePageState extends State<GuidePage> {
                           ),
                           child: InkWell(
                             onTap: () {
-                              RouteUtils.pushReplacePage(context,MainPage());
+                              LoginUser loginUser = StorageUtils.getModelWithKey("userInfo") as LoginUser;
+                              if(null != loginUser){
+                                RouteUtils.pushReplacePage(context,MainPage());
+                              }else{
+                                RouteUtils.pushReplacePage(context,LoginPage());
+                              }
                             },
                             borderRadius: BorderRadius.all(Radius.circular(22)),
                             splashColor: Colors.grey,

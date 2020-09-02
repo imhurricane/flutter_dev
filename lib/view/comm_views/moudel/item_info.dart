@@ -53,7 +53,7 @@ class ItemListViewContent {
     subTitle = json['subTitle'];
     describe = json['describe'];
     id = json['id'];
-    id = json['note'];
+    note = json['note'];
     title = json['title'];
   }
 

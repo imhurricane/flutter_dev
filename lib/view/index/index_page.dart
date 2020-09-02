@@ -1,5 +1,6 @@
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/login/login_page.dart';
 import 'package:flutter_dev/view/main/root/main_page.dart';
@@ -41,15 +42,11 @@ class IndexPageState extends State<IndexPage> {
   }
 
   readCacheData() async {
-    /// 等待Sp初始化完成。
-    await SpUtil.getInstance();
-
-    bool isFirst = SpUtil.getBool("is_first");
-    user = SpUtil.getObject("userInfo");
-
+    bool isFirst = StorageUtils.getBoolWithKey("is_first");
+    user = StorageUtils.getModelWithKey("userInfo");
     if (isFirst == null || isFirst == false) {
       //第一次进入APP  进入引导页
-      SpUtil.putBool("is_first", true);
+      StorageUtils.saveBool("is_first", true);
       RouteUtils.pushReplacePage(context, GuidePage());
     } else {
       //倒计时进入主页

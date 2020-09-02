@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/detail/detail_page.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
+import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
 import 'package:flustars/flustars.dart';
@@ -111,7 +113,7 @@ class CommListViewState extends State<CommListView> {
                       child: IntrinsicHeight(
                         child: Container(
                           constraints: BoxConstraints(
-                            minHeight: 80,
+                            minHeight: 60,
                           ),
                           child: Row(
                             children: [
@@ -131,25 +133,20 @@ class CommListViewState extends State<CommListView> {
                               Expanded(
                                 flex: 8,
                                 child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(4.0),
                                   child: Column(
-                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        viewItems[index].itemListViewContent.title,
-                                        style: TextStyle(
-                                            fontSize: 18, color: Colors.black,fontWeight: FontWeight.w400),
+                                      Html(
+                                        style: {"body":Style(alignment: Alignment.center,fontSize: FontSize.percent(130),color: Colors.black,fontWeight: FontWeight.w400)},
+                                        data: viewItems[index].itemListViewContent.title,
                                       ),
                                       Offstage(
                                         offstage: viewItems[index].itemListViewContent.describe!=null?false:true,
                                         child: Html(
-                                          style: {
-                                            "body" : Style(
-                                              color:Colors.grey[800],
-                                            ),
-                                          },
+                                          style: {"body" : Style(fontSize: FontSize.percent(116),color:Colors.grey[800],),},
                                           data: viewItems[index].itemListViewContent.describe==null?"":viewItems[index].itemListViewContent.describe,
                                         ),
                                       ),
@@ -157,9 +154,8 @@ class CommListViewState extends State<CommListView> {
                                         offstage: viewItems[index].itemListViewContent.note!=null?false:true,
                                         child: Html(
                                           style:{
-                                            "html" : Style(
-                                              fontSize: FontSize.xxLarge,
-
+                                            "body" : Style(
+                                              fontSize: FontSize.percent(110),color: Colors.grey[400]
                                             ),
                                           },
                                           data: viewItems[index].itemListViewContent.note==null?"":viewItems[index].itemListViewContent.note,
@@ -169,14 +165,19 @@ class CommListViewState extends State<CommListView> {
                                   ),
                                 ),
                               ),
-                              Container(
-                                constraints: BoxConstraints(
-                                  maxWidth: 100,
-                                ),
-                                child: Text(viewItems[index].itemListViewContent.subTitle==null?"":viewItems[index].itemListViewContent.subTitle
-                                  ,style:
-                                TextStyle(
-                                      fontSize: 17, color: Colors.blueAccent),
+                              Offstage(
+                                offstage: viewItems[index].itemListViewContent.subTitle!=null?false:true,
+                                child: Container(
+                                  constraints: BoxConstraints(
+                                    maxWidth: 110,
+                                  ),
+                                  child: Html(
+                                    data: viewItems[index].itemListViewContent.subTitle==null?"":viewItems[index].itemListViewContent.subTitle,
+                                    style:{
+                                      "body":Style(
+                                      fontSize: FontSize.percent(130),color: Colors.blueAccent),
+                                  },
+                                  ),
                                 ),
                               ),
                               Icon(Icons.keyboard_arrow_right,size: 24,),
@@ -199,7 +200,7 @@ class CommListViewState extends State<CommListView> {
     });
     await initData();
     mRefreshController.loadComplete();
-//    mRefreshController.loadNoData();
+    mRefreshController.loadNoData();
   }
 
   onRefresh() async {
@@ -217,34 +218,44 @@ class CommListViewState extends State<CommListView> {
 
   initData() async {
     var baseMap = DataHelper.getBaseMap();
-    baseMap.clear();
-    Map<String, dynamic> user = SpUtil.getObject("userInfo");
-    debugPrint("page:"+widget.entryModel.toPage);
-    baseMap['toPage']=widget.entryModel.toPage;
-    baseMap['pageSize']=pageInfo.pageSize;
-    baseMap['pageNumber']=pageInfo.pageNumber;
-    baseMap['yhxtm']=user['yhxtm'];
-    if(widget.entryModel.params != null){
-      baseMap.addAll(widget.entryModel.params);
-    }
+    baseMap.clear();///8aUUVC4cbmHyy6+2yB+/2A==
+    Map<String, dynamic> user = StorageUtils.getModelWithKey("userInfo");
+    if(null != user){
+      debugPrint("page:"+widget.entryModel.toPage);
+      debugPrint("user:"+user.toString());
+      baseMap['toPage']=widget.entryModel.toPage;
+      baseMap['pageSize']=pageInfo.pageSize;
+      baseMap['pageNumber']=pageInfo.pageNumber;
+      baseMap['yhxtm']=user['yhxtm'];
+      if(widget.entryModel.params != null){
+        baseMap.addAll(widget.entryModel.params);
+      }
 
-    ResultData result = await HttpManager.getInstance().get(Address.MenuItemUrl, baseMap);
-    if(result.code == 200){
-      debugPrint("data:"+result.data);
-      List json = jsonDecode(result.data);
+      ResultData result = await HttpManager.getInstance().get(Address.MenuItemUrl, baseMap);
+      if(result.code == 200){
+        debugPrint("data:"+result.data);
+        List json = jsonDecode(result.data);
 
-      json.forEach((element) {
-        viewItems.add(ListViewItem.fromJson(element));
-      });
+        json.forEach((element) {
+          viewItems.add(ListViewItem.fromJson(element));
+        });
 
-      debugPrint("viewItems:"+viewItems[0].icon);
-      setState(() {
+        debugPrint("viewItems:"+viewItems[0].icon);
+        setState(() {
 
-      });
+        });
+      }else{
+        setState(() {
+
+        });
+        CommUtils.showDialog(context, "提示", "${result.data}", false,
+            okOnPress: () {});
+      }
     }else{
-      CommUtils.showDialog(context, "提示", "${result.data}", false,
-          okOnPress: () {});
+//      CommUtils.showDialog(context, "提示", "登录信息过期,请重新登录", false,
+//          okOnPress: () {});
     }
+
   }
 
 }

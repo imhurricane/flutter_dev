@@ -22,7 +22,6 @@ class MainHomePageState extends State<MainHomePage>
   @override
   void initState() {
     super.initState();
-    redCach();
   }
 
   @override
@@ -124,7 +123,4 @@ class MainHomePageState extends State<MainHomePage>
     );
   }
 
-  redCach() async {
-    await SpUtil.getInstance();
-  }
 }
