@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../main_find_page.dart';
 import '../home/home_page.dart';
-import '../main_mine_page.dart';
+import '../mine/main_mine_page.dart';
 import '../main_sort_page.dart';
 
 class MainPage extends StatefulWidget{

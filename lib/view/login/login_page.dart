@@ -12,6 +12,7 @@ import 'package:flutter_dev/http/data_helper.dart';
 import 'package:flutter_dev/http/http_manager.dart';
 import 'package:flutter_dev/http/result_data.dart';
 import 'package:flutter_dev/router/route_util.dart';
+import 'package:flutter_dev/view/comm_views/components/login_textfield.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:flutter_dev/view/main/root/main_page.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -169,6 +170,7 @@ class LoginPageState extends State<LoginPage>
             ),
             buildInputWidget("resources/images/password.png", "请输入密码",
                 passWordFocusNode, pwTextEditingController),
+
             buildAgreementWidget(),
             SizedBox(
               height: 40,
@@ -242,6 +244,8 @@ class LoginPageState extends State<LoginPage>
   buildRowWidget(String img, String hintText, FocusNode focusNode,
       TextEditingController controller) {
     return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Padding(
           padding: EdgeInsets.only(left: 10),
@@ -260,46 +264,22 @@ class LoginPageState extends State<LoginPage>
           ),
         ),
         Expanded(
-          child: TextField(
+          child: LoginTextField(
+//            text: "asdas",
+//            labelText: "123123",
+            border: InputBorder.none,
+            isShowDeleteBtn:true,
             controller: controller,
             focusNode: focusNode,
-            onSubmitted: (value) {
-              /// 下一步按钮  光标控制
-              focusNode.unfocus();
-              if (focusNode == userFocusNode) {
-                FocusScope.of(context).requestFocus(passWordFocusNode);
-              } else if (focusNode == passWordFocusNode) {
-                focusNode.unfocus();
-              }
-            },
-            textInputAction: TextInputAction.newline,
-            keyboardType: focusNode==userFocusNode?TextInputType.text:TextInputType.visiblePassword,
+            isDense: true,
+            keyboardType: focusNode==userFocusNode?TextInputType.visiblePassword:TextInputType.visiblePassword,
 //            inputFormatters: [
 //              LengthLimitingTextInputFormatter(11),
 //            ],
-            style: TextStyle(fontSize: 16, color: Colors.white),
-            decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: TextStyle(color: Color(0xaafafafa)),
-              border: InputBorder.none,
-            ),
+          inputFormatters: [],
+            isPwd: focusNode==userFocusNode?false:true,
           ),
         ),
-        focusNode.hasFocus
-            ? InkWell(
-                onTap: () {
-                  ///清除已输入信息
-                  controller.text = '';
-                },
-                child: Container(
-                  margin: EdgeInsets.only(left: 10, right: 10),
-                  child: Icon(
-                    Icons.cancel,
-                    color: Colors.white,
-                  ),
-                ),
-              )
-            : Container(),
       ],
     );
   }
@@ -426,7 +406,7 @@ class LoginPageState extends State<LoginPage>
     if (currentStatus == ResultStatus.success) {
       loadingWidget = Icon(
         Icons.check,
-        color: Colors.blue,
+        color: Colors.lightBlue,
       );
     } else if (currentStatus == ResultStatus.error) {
       loadingWidget = Icon(

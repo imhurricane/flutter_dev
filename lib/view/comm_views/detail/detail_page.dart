@@ -90,7 +90,7 @@ class DetailPageState extends State<DetailPage>{
                   IconButton(
                     onPressed: () async {
                       final result = await showMenu(
-//                        color: Colors.grey[700],
+                        color: Colors.grey[700],
                           context: context,
                           position: RelativeRect.fromLTRB(4000.0, 90.0, 0.0, 100.0),
                           items: buildTopRightButton()
@@ -318,12 +318,12 @@ class DetailPageState extends State<DetailPage>{
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add_circle_outline,size: 20,),
+                Icon(Icons.add_circle,size: 20,color: Colors.white,),
                 SizedBox(width: 4.0,),
-                Text(buttonTopRight[i].description,style: TextStyle(fontSize:18,color: Colors.black),),
+                Text(buttonTopRight[i].description,style: TextStyle(fontSize:18,color: Colors.white),),
               ],
             )));
-        items.add(PopupMenuDivider(height: 1.0));
+//        items.add(PopupMenuDivider(height: 1.0));
       }
     }
     return items;

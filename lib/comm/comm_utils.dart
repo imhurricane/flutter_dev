@@ -16,6 +16,7 @@ class CommUtils {
         btnCancelOnPress: cancelOnPress,
         btnOkOnPress: okOnPress,
         btnOkText: "确定",
+        btnCancelText: "取消",
       )..show();
     }else{
       AwesomeDialog(

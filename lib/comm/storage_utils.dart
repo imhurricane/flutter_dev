@@ -18,8 +18,6 @@ class StorageUtils {
   static Future<bool> saveString(String key, String value) {
     key = EncryptUtils.aesEncrypt(key);
     value = EncryptUtils.aesEncrypt(value);
-    print("key:"+key);
-    print("value:"+value);
     return SpUtil.putString(key, value);
   }
 
@@ -27,8 +25,6 @@ class StorageUtils {
   static String getStringWithKey(String key) {
     key = EncryptUtils.aesEncrypt(key);
     var enValue = SpUtil.getString(key);
-    print("key:"+key);
-    print("value:"+enValue);
     if (enValue.length > 0) {
       return EncryptUtils.aesDecrypt(enValue);
     }
@@ -82,7 +78,6 @@ class StorageUtils {
   //取 Model
   static Map getModelWithKey(String key) {
     var jsonString = getStringWithKey(key);
-    print("jsonString:"+jsonString);
     return (jsonString == null || jsonString.isEmpty)
         ? null
         : convert.jsonDecode(jsonString);
