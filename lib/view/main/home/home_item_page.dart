@@ -157,18 +157,22 @@ class HomeItemPageState extends State<HomeItemPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Image.network(
-                          "${Address.BaseImageURL + entryModels[index].icon}",
-                          width: 44,
-                          height: 44,
-                          alignment: Alignment.center,
+                        Expanded(
+                          child: Image.network(
+                            "${Address.BaseImageURL + entryModels[index].icon}",
+                            width: 44,
+                            height: 44,
+                            alignment: Alignment.center,
+                          ),
                         ),
-                        Center(
-                          child: Text(
-                            "${entryModels[index].title}",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              "${entryModels[index].title}",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),

@@ -41,32 +41,31 @@ class _CheckBoxSelectState extends State<CheckBoxSelect> {
         childAspectRatio = 1;
         break;
     }
-    return Material(
-        child: InkWell(
+    return InkWell(
       child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            GridView.builder(
-                itemCount: widget.selects.length,
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(0.0),
-                //SliverGridDelegateWithFixedCrossAxisCount 构建一个横轴固定数量Widget
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    //横轴元素个数
-                    crossAxisCount: widget.itemCount,
-                    //纵轴间距
-                    mainAxisSpacing: 0.0,
-                    //横轴间距
-                    crossAxisSpacing: 0.0,
-                    //子组件宽高长度比例
-                    childAspectRatio: childAspectRatio),
-                itemBuilder: (BuildContext context, int index) {
-                  //Widget Function(BuildContext context, int index)
-                  return buildGridItem(widget.selects, index);
-                }),
-          ]),
-    ));
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        GridView.builder(
+            itemCount: widget.selects.length,
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(0.0),
+            //SliverGridDelegateWithFixedCrossAxisCount 构建一个横轴固定数量Widget
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                //横轴元素个数
+                crossAxisCount: widget.itemCount,
+                //纵轴间距
+                mainAxisSpacing: 0.0,
+                //横轴间距
+                crossAxisSpacing: 0.0,
+                //子组件宽高长度比例
+                childAspectRatio: childAspectRatio),
+            itemBuilder: (BuildContext context, int index) {
+              //Widget Function(BuildContext context, int index)
+              return buildGridItem(widget.selects, index);
+            }),
+      ]),
+    );
   }
 
   buildGridItem(List<Selects> selects, int index) {
@@ -118,6 +117,7 @@ class _CheckBoxSelectState extends State<CheckBoxSelect> {
               Expanded(
                 flex: 1,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [],
                 ),
               )

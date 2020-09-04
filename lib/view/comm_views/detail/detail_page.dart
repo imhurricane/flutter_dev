@@ -11,12 +11,19 @@ import 'package:flutter_dev/http/address.dart';
 import 'package:flutter_dev/http/data_helper.dart';
 import 'package:flutter_dev/http/http_manager.dart';
 import 'package:flutter_dev/http/result_data.dart';
-import 'package:flutter_dev/view/comm_views/components/buttom_location.dart';
 import 'package:flutter_dev/view/comm_views/components/check_box_select_.dart';
+import 'package:flutter_dev/view/comm_views/components/comm_bottom_action.dart';
+import 'package:flutter_dev/view/comm_views/components/drop_down.dart';
 import 'package:flutter_dev/view/comm_views/components/float_button.dart';
 import 'package:flutter_dev/view/comm_views/components/form_Input_cell.dart';
+import 'package:flutter_dev/view/comm_views/components/picture_show.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
+import 'package:multiple_select/Item.dart';
+import 'package:multiple_select/multi_filter_select.dart';
+import 'package:multiple_select/multiple_select.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import 'detail_page_item.dart';
 
 class DetailPage extends StatefulWidget {
   final DetailPageInfo detailPage;
@@ -51,18 +58,22 @@ class DetailPageState extends State<DetailPage>{
   FocusNode blankNode = FocusNode();
   bool selected = false;
   ScrollController scrollController;
+  List<DetailPageItem> pageItems;
+  List<String> imagePaths;
 
   @override
   void initState() {
     super.initState();
     initData();
+
     scrollController = new ScrollController();
     scrollController.addListener(() {
-      print('${scrollController.position}');
+//      print('${scrollController.position}');
 //      print("offset:"+scrollController.offset.toString());
 //      if(scrollController.position > 0){
 //        FocusScope.of(context).requestFocus(blankNode);
 //      }
+
     });
   }
 
@@ -95,8 +106,11 @@ class DetailPageState extends State<DetailPage>{
                           position: RelativeRect.fromLTRB(4000.0, 90.0, 0.0, 100.0),
                           items: buildTopRightButton()
                           );
-                      // TODO 封装按钮处理类 便于调用
-                      debugPrint("asdas:"+result.toString());
+                      dynamic imagePath = CommBottomAction.action(int.parse(result));
+                      setState(() {
+                        imagePaths.add(imagePath);
+                      });
+                      print("imagePath:" + imagePath);
                     },
                     icon: Icon(Icons.more_vert),
                   ),
@@ -105,49 +119,69 @@ class DetailPageState extends State<DetailPage>{
             ];
           },
           body: Container(
-              color: Colors.grey[200],
-              child: SmartRefresher(
-                enablePullDown: true,
-                enablePullUp: false,
-                header: WaterDropHeader(
-                  waterDropColor: Colors.blue,
-                ),
-                footer: ClassicFooter(),
-                controller: mRefreshController,
-                onRefresh: onRefresh,
-                onLoading: onLoading,
-                child: buildBody(),
-              )),
+            color: Colors.white,
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: SmartRefresher(
+              enablePullDown: true,
+              enablePullUp: false,
+              header: WaterDropHeader(
+                waterDropColor: Colors.blue,
+              ),
+              footer: ClassicFooter(),
+              controller: mRefreshController,
+              onRefresh: onRefresh,
+              onLoading: onLoading,
+              child: ListView.builder(
+                itemBuilder: (BuildContext context,int index){
+                  return buildBody(index);
+                },
+                itemCount: pageItems?.length,),
+            )),
+
         ),
         bottomNavigationBar: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: buildFloatButton(detailData.itemDetailButtons),
+          children: buildBottomButton(detailData.itemDetailButtons),
         ),
-//        bottomSheet: Text("asdasda"),
-//        floatingActionButton:Row(
-//          mainAxisSize: MainAxisSize.max,
-//          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//          children: buildFloatButton(detailData.itemDetailButtons),
-//        ),
-//        floatingActionButtonLocation: CustomFloatingActionButtonLocation(
-//            FloatingActionButtonLocation.centerFloat, 0, 16),
       ),
     );
   }
 
   onLoading() async {
-    FocusScope.of(context).requestFocus(blankNode);
     mRefreshController.loadComplete();
 //    mRefreshController.loadNoData();
   }
 
-  onRefresh() async {
-    FocusScope.of(context).requestFocus(blankNode);
+  Future onRefresh() async {
+
+    setState(() {
+      initData();
+    });
     mRefreshController.refreshCompleted();
   }
 
   initData() async {
+    DetailPageItem detailPageItem = DetailPageItem(
+      xh: 1,
+      itemType: PageItemType.column,
+    );
+    DetailPageItem detailPageItemPicture = DetailPageItem(
+      xh: 2,
+      itemType: PageItemType.picture,
+    );
+    pageItems = List<DetailPageItem>();
+
+    pageItems.add(detailPageItem);
+    pageItems.add(detailPageItemPicture);
+    /// 按序号排序
+    pageItems.sort((a,b)=>(a.xh).compareTo(b.xh));
+
+    imagePaths = new List<String>();
+    for (int i = 0; i < 4; i++) {
+//      imagePaths.add("https://gitee.com/iotjh/Picture/raw/master/lufei2.png");
+    }
+
     var baseMap = DataHelper.getBaseMap();
     baseMap.clear();
     Map<String, dynamic> user = StorageUtils.getModelWithKey("userInfo");
@@ -173,29 +207,53 @@ class DetailPageState extends State<DetailPage>{
     }
   }
 
-  buildBody() {
+  buildBody(int index) {
+    switch(pageItems[index].itemType){
+      case PageItemType.column:
+        return buildColumn();
+        break;
+      case PageItemType.picture:
+        return buildPicture();
+        break;
+    }
 
+  }
+
+  buildPicture(){
+   return  GestureDetector(
+     onTap: () {
+       FocusScope.of(context).requestFocus(blankNode);
+     },
+     child: imagePaths.length>0?Container(
+        child: PictureShow(
+          picList: imagePaths,
+          columnSize:3,
+          isLocal: true,
+        ),
+      ):Container(),
+   );
+  }
+
+  buildColumn(){
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(blankNode);
       },
-      child: Container(
-        child: ListView.builder(
-            shrinkWrap: true,
-            primary: false,
-            physics:BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(0.0),
-            cacheExtent: 30.0,
-            itemCount: detailData.itemDetailColumns == null ? 0
-                : detailData.itemDetailColumns.length,
-            itemBuilder: (BuildContext context, int index) {
-              return buildColumn(index, detailData.itemDetailColumns[index]);
-            }),
-      ),
+      child: ListView.builder(
+          shrinkWrap: true,
+          primary: false,
+          physics: NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(0.0),
+          cacheExtent: 30.0,
+          itemCount: detailData.itemDetailColumns == null ? 0
+              : detailData.itemDetailColumns.length,
+          itemBuilder: (BuildContext context, int index) {
+            return buildColumnItem(index, detailData.itemDetailColumns[index]);
+          }),
     );
   }
 
-  buildColumn(int index, ItemDetailColumns item) {
+  buildColumnItem(int index, ItemDetailColumns item) {
     switch (item.itemType) {
       case 1:
         return buildTextField(index, item);
@@ -204,7 +262,7 @@ class DetailPageState extends State<DetailPage>{
         return buildTextField(index, item);
         break;
       case 3:
-        return buildTextField(index, item);
+        return buildDropDown(index);
         break;
       case 4:
         return buildTextField(index, item);
@@ -215,15 +273,20 @@ class DetailPageState extends State<DetailPage>{
       case 6:
         return buildDatePicker(index, item);
         break;
+      case 7:
+        return buildTextField(index, item);
+        break;
+      case 8:
+        return buildSwitch(index, item);
+        break;
       case 9:
-        return buildSelectOptions(index, item);
+        return buildSelectOptions(index);
         break;
       default:
         buildTextField(index, item);
         break;
     }
   }
-
 
   ///  创建普通可编辑text文本框
   buildTextField(int index, ItemDetailColumns item) {
@@ -251,7 +314,7 @@ class DetailPageState extends State<DetailPage>{
           onTap: () {
             DatePickerTool.showDatePicker(
               context,
-              dateType: DateType.YMD_HM,
+              dateType: DateType.YMD,
               clickCallback: (selectDateStr, selectDate) {
                 String formatDate = DateUtil.formatDateStr(selectDate,
                     format: DateFormats.full);
@@ -269,7 +332,9 @@ class DetailPageState extends State<DetailPage>{
   }
 
   ///  创建单选多选CheckBox
-  buildSelectOptions(int index, ItemDetailColumns item) {
+  buildSelectOptions(int index) {
+    ItemDetailColumns item = detailData.itemDetailColumns[index];
+
     // TODO  需要增加每行显示个数配置
     return FormInputCell(
       space: titleSpaces,
@@ -279,14 +344,71 @@ class DetailPageState extends State<DetailPage>{
       titleContentSpaces: titleContentSpaces,
       textWidget: CheckBoxSelect(
         selects: item.selects,
-        isMulti: true,
+        isMulti: false,
         itemCount: 2,
       ),
     );
   }
 
+  // 下拉菜单
+  buildDropDown(int index) {
+    ItemDetailColumns item = detailData.itemDetailColumns[index];
+    return  FormInputCell(
+      space: titleSpaces,
+      titlePosition: titlePosition,
+      title: item.columnDes == null ? "" : item.columnDes + ":",
+      titleStyle: titleStyle,
+      titleContentSpaces: titleContentSpaces,
+      textWidget: FromDropDownSearch(
+        selects: item.selects,
+        selectCallBack: (select){
+          setState(() {
+            for(int i=0;i<item.selects.length;i++){
+              if(item.selects[i].value == select.value){
+                detailData.itemDetailColumns[index].selects[i].isChecked=true;
+                detailData.itemDetailColumns[index].columnValue = select.value;
+              }else{
+                detailData.itemDetailColumns[index].selects[i].isChecked=false;
+              }
+            }
+          });
+        },
+      ),
+    );
+  }
+
+  // 开关
+  buildSwitch(int index, ItemDetailColumns item) {
+    return FormInputCell(
+      space: titleSpaces,
+      titlePosition: titlePosition,
+      title: item.columnDes == null ? "" : item.columnDes + ":",
+      titleStyle: titleStyle,
+      textWidget: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left:8.0,top:4.0,bottom: 4.0),
+            child: CupertinoSwitch(
+              value: detailData.itemDetailColumns[index].columnValue=="1"?true:false,
+              onChanged: (bool value) {
+                String v = value?"1":"0";
+                setState(() {
+                  detailData.itemDetailColumns[index].columnValue = v;
+                });
+
+              },
+
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// 创建底部按钮组
-  buildFloatButton(ItemDetailButtons itemDetailButtons) {
+  buildBottomButton(ItemDetailButtons itemDetailButtons) {
     List<Widget> buttons = new List<Widget>();
     if (null != itemDetailButtons) {
       for (int i = 0; i < itemDetailButtons.itemDetailButtonBottom.length; i++) {
@@ -294,8 +416,11 @@ class DetailPageState extends State<DetailPage>{
           buttons.add(FloatButton(
             value: itemDetailButtons.itemDetailButtonBottom[i].description,
             onPressed: () {
-              // TODO 按钮的处理事件
-              debugPrint("as:"+itemDetailButtons.itemDetailButtonBottom[i].toJson().toString());
+              dynamic imagePath = CommBottomAction.action(itemDetailButtons.itemDetailButtonBottom[i].buttonType);
+              print("imagePath:" + imagePath);
+              setState(() {
+                imagePaths.add(imagePath);
+              });
             },
           ));
         }
@@ -303,9 +428,6 @@ class DetailPageState extends State<DetailPage>{
     }
     return buttons;
   }
-
-  @override
-  bool get wantKeepAlive => true;
 
   buildTopRightButton() {
     List<PopupMenuEntry<String>> items = new List<PopupMenuEntry<String>>();
@@ -327,6 +449,42 @@ class DetailPageState extends State<DetailPage>{
       }
     }
     return items;
+  }
+
+  buildMultipleSelect(int index, ItemDetailColumns item) {
+
+    List<MultipleSelectItem> elements =
+    List.generate(item.selects==null?0:item.selects.length, (index) =>
+        MultipleSelectItem.build(
+            value: index,
+            display: item.selects[index].desc==null?"":item.selects[index].desc,
+            content: item.selects[index].desc,
+        ));
+    List _values = [];//item.
+    List<Item<num, String, String>> items = List.generate(
+      150,
+          (index) =>
+          Item.build(
+            value: index,
+            display: '$index display',
+            content: '$index content' * (index + 1),
+          ),
+    );// selects;
+    return FormInputCell(
+      space: titleSpaces,
+      titlePosition: titlePosition,
+      title: item.columnDes == null ? "" : item.columnDes + ":",
+      titleStyle: titleStyle,
+      textWidget: Padding(
+        padding: EdgeInsets.only(left:12.0),
+        child:
+        MultiFilterSelect(
+          allItems: items,
+          initValue: _values,
+          selectCallback: (List selectedValue) => print(selectedValue.length),
+        ),
+      ),
+    );
   }
 
 
