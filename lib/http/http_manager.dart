@@ -84,7 +84,27 @@ class HttpManager {
 
     return response.data;
   }
+
+  uploadPicture(api,Map<String, dynamic> params,path) async{
+    Response response;
+    var name = path.substring(path.lastIndexOf("/") + 1, path.length);
+    var image = await MultipartFile.fromFile(
+      path,
+      filename: name,
+    );
+    FormData formData = FormData.fromMap({
+      "image": image
+    });
+    try {
+      response = await _dio.post(api,data: formData,queryParameters: params);
+    } on DioError catch (e) {
+      return resultError(e);
+    }
+    return response.data;
+  }
 }
+
+
 
 ResultData resultError(DioError e) {
   Response errorResponse;

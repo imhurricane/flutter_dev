@@ -9,4 +9,6 @@ class Address {
   static const String BaseImageURL = BASE_URL + "/app/images/";
   static const String MenuItemUrl = BASE_PACKAGE + "MenuItemServlet";
   static const String MenuItemDetailUrl = BASE_PACKAGE + "MenuItemDetailServlet";
+  // 图片上传URL
+  static const String DetailPageIconUrl = BASE_URL + "/attachfileuploadservlet/?requesttype=sig";
 }

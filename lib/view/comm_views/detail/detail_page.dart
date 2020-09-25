@@ -1,11 +1,14 @@
+import 'dart:collection';
 import 'dart:convert';
 
+import 'package:device_info/device_info.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_dev/comm/comm_utils.dart';
 import 'package:flutter_dev/comm/date_picker_tool.dart';
+import 'package:flutter_dev/comm/device_info.dart';
 import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/http/address.dart';
 import 'package:flutter_dev/http/data_helper.dart';
@@ -16,6 +19,7 @@ import 'package:flutter_dev/view/comm_views/components/comm_bottom_action.dart';
 import 'package:flutter_dev/view/comm_views/components/drop_down.dart';
 import 'package:flutter_dev/view/comm_views/components/float_button.dart';
 import 'package:flutter_dev/view/comm_views/components/form_Input_cell.dart';
+import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/components/picture_show.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
 import 'package:multiple_select/Item.dart';
@@ -38,7 +42,7 @@ class DetailPage extends StatefulWidget {
 
 class DetailPageState extends State<DetailPage>{
   RefreshController mRefreshController = new RefreshController();
-  DetailData detailData = new DetailData();
+  DetailData detailData;
   final double titleContentSpaces = 10;
   final double titleSpaces = 90;
   final Alignment titlePosition = Alignment.centerRight;
@@ -59,11 +63,13 @@ class DetailPageState extends State<DetailPage>{
   bool selected = false;
   ScrollController scrollController;
   List<DetailPageItem> pageItems;
-  List<String> imagePaths;
+  List<LocalMedia> images = new List<LocalMedia>();
 
   @override
   void initState() {
     super.initState();
+    detailData = new DetailData();
+    initMenu();
     initData();
 
     scrollController = new ScrollController();
@@ -106,13 +112,18 @@ class DetailPageState extends State<DetailPage>{
                           position: RelativeRect.fromLTRB(4000.0, 90.0, 0.0, 100.0),
                           items: buildTopRightButton()
                           );
-                      dynamic imagePath = CommBottomAction.action(int.parse(result));
-                      setState(() {
-                        imagePaths.add(imagePath);
-                      });
-                      print("imagePath:" + imagePath);
+                      dynamic imagePath = await CommBottomAction.action(context,int.parse(result==null?"0":result));
+                      if(null != imagePath){
+                        LocalMedia localMedia = LocalMedia();
+                        localMedia.realPath=imagePath;
+                        localMedia.mimeType=imagePath;
+                        setState(() {
+                          images.add(localMedia);
+                        });
+                        uploadPicture(imagePath);
+                      }
                     },
-                    icon: Icon(Icons.more_vert),
+                    icon: Icon(Icons.menu),
                   ),
                 ],
               ),
@@ -131,11 +142,7 @@ class DetailPageState extends State<DetailPage>{
               controller: mRefreshController,
               onRefresh: onRefresh,
               onLoading: onLoading,
-              child: ListView.builder(
-                itemBuilder: (BuildContext context,int index){
-                  return buildBody(index);
-                },
-                itemCount: pageItems?.length,),
+              child: buildBody(),
             )),
 
         ),
@@ -161,7 +168,7 @@ class DetailPageState extends State<DetailPage>{
     mRefreshController.refreshCompleted();
   }
 
-  initData() async {
+  initMenu(){
     DetailPageItem detailPageItem = DetailPageItem(
       xh: 1,
       itemType: PageItemType.column,
@@ -176,12 +183,9 @@ class DetailPageState extends State<DetailPage>{
     pageItems.add(detailPageItemPicture);
     /// 按序号排序
     pageItems.sort((a,b)=>(a.xh).compareTo(b.xh));
+  }
 
-    imagePaths = new List<String>();
-    for (int i = 0; i < 4; i++) {
-//      imagePaths.add("https://gitee.com/iotjh/Picture/raw/master/lufei2.png");
-    }
-
+  initData() async {
     var baseMap = DataHelper.getBaseMap();
     baseMap.clear();
     Map<String, dynamic> user = StorageUtils.getModelWithKey("userInfo");
@@ -197,17 +201,50 @@ class DetailPageState extends State<DetailPage>{
     ResultData result =
         await HttpManager.getInstance().get(Address.MenuItemDetailUrl, baseMap);
     if (result.code == 200) {
-      debugPrint("data:" + result.data);
       Map<String, dynamic> json = jsonDecode(result.data);
-      detailData = DetailData.fromJson(json);
-      setState(() {});
+      setState(() {
+        detailData = DetailData.fromJson(json);
+        images = detailData.iconInfoList.localMedia;
+      });
     } else {
       CommUtils.showDialog(context, "提示", "${result.data}", false,
           okOnPress: () {});
     }
   }
 
-  buildBody(int index) {
+  uploadPicture(imagePath) async{
+    var deviceId = await DeviceInfo.getDeviceInfo();
+
+    var params = HashMap<String,dynamic>();
+    params['a']="b";
+    params['type']="p";
+    params['tablename']=detailData.tableName;
+    params['yhxtm']=CommUtils.getUserInfo().yhxtm;
+    params['photolocpath']=imagePath;
+    params['devicextm']=deviceId;
+    params['riskxtm']=widget.detailPage.id;
+    params['suggetstxtm']="";
+    params['time']=DateUtil.formatDate(DateTime.now());
+
+    HttpManager.getInstance().uploadPicture(Address.DetailPageIconUrl, params , imagePath);
+  }
+
+  buildBody() {
+    if(detailData.itemDetailColumns != null && !TextUtil.isEmpty(detailData.itemDetailColumns.toList().toString())){
+      return ListView.builder(
+        itemBuilder: (BuildContext context,int index){
+          return buildPageItem(index);
+        },
+        itemCount: pageItems?.length,
+      );
+    }else{
+      return PageLoading(
+        iconColor: Colors.grey,
+      );
+    }
+  }
+
+  buildPageItem(int index) {
     switch(pageItems[index].itemType){
       case PageItemType.column:
         return buildColumn();
@@ -216,7 +253,6 @@ class DetailPageState extends State<DetailPage>{
         return buildPicture();
         break;
     }
-
   }
 
   buildPicture(){
@@ -224,9 +260,9 @@ class DetailPageState extends State<DetailPage>{
      onTap: () {
        FocusScope.of(context).requestFocus(blankNode);
      },
-     child: imagePaths.length>0?Container(
+     child: images.length>0?Container(
         child: PictureShow(
-          picList: imagePaths,
+          imageUrl: images==null?"":images,
           columnSize:3,
           isLocal: true,
         ),
@@ -415,12 +451,17 @@ class DetailPageState extends State<DetailPage>{
         if (i < 4) {
           buttons.add(FloatButton(
             value: itemDetailButtons.itemDetailButtonBottom[i].description,
-            onPressed: () {
-              dynamic imagePath = CommBottomAction.action(itemDetailButtons.itemDetailButtonBottom[i].buttonType);
-              print("imagePath:" + imagePath);
-              setState(() {
-                imagePaths.add(imagePath);
-              });
+            onPressed: () async{
+              dynamic imagePath = await CommBottomAction.action(context,itemDetailButtons.itemDetailButtonBottom[i].buttonType);
+              if(null != imagePath){
+                LocalMedia localMedia = LocalMedia();
+                localMedia.realPath=imagePath;
+                localMedia.mimeType=imagePath;
+                setState(() {
+                  images.add(localMedia);
+                });
+                uploadPicture(imagePath);
+              }
             },
           ));
         }
@@ -486,6 +527,8 @@ class DetailPageState extends State<DetailPage>{
       ),
     );
   }
+
+
 
 
 }

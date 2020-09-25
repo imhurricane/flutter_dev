@@ -49,6 +49,7 @@ class _CheckBoxSelectState extends State<CheckBoxSelect> {
         GridView.builder(
             itemCount: widget.selects.length,
             shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(0.0),
             //SliverGridDelegateWithFixedCrossAxisCount 构建一个横轴固定数量Widget
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

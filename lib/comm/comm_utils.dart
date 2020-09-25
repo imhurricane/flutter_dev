@@ -1,11 +1,14 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_dev/comm/storage_utils.dart';
+import 'package:flutter_dev/moudel/user_bean.dart';
+import 'package:flutter_dev/view/login/moudel/user.dart';
 
 class CommUtils {
-
-  static showDialog(BuildContext context, String title, String msg,bool showCancel,
-      {cancelOnPress,okOnPress}) {
-    if(showCancel){
+  static showDialog(
+      BuildContext context, String title, String msg, bool showCancel,
+      {cancelOnPress, okOnPress}) {
+    if (showCancel) {
       AwesomeDialog(
         context: context,
         headerAnimationLoop: false,
@@ -18,7 +21,7 @@ class CommUtils {
         btnOkText: "确定",
         btnCancelText: "取消",
       )..show();
-    }else{
+    } else {
       AwesomeDialog(
         context: context,
         headerAnimationLoop: false,
@@ -30,6 +33,11 @@ class CommUtils {
         btnOkText: "确定",
       )..show();
     }
-
   }
+
+  /// 获取用户信息
+  static LoginUser getUserInfo(){
+    return LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
+  }
+
 }

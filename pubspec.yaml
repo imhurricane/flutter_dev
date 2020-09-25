@@ -89,6 +89,11 @@ dependencies:
   #select_days_week: ^0.1.1
   # 源码已修改  升级请谨慎  去掉了下划线
   multiple_select: 0.1.23
+  # 加载loading
+  flutter_spinkit: "^4.1.2"
+  # 获取手机信息
+  device_info : ^0.2.0
+  signature: ^2.0.0   #签名
 
 dev_dependencies:
   flutter_test:

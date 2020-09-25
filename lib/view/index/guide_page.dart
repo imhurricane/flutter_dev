@@ -78,8 +78,9 @@ class GuidePageState extends State<GuidePage> {
                           ),
                           child: InkWell(
                             onTap: () {
-                              LoginUser loginUser = StorageUtils.getModelWithKey("userInfo") as LoginUser;
-                              if(null != loginUser){
+                              var jsonStr = StorageUtils.getModelWithKey("userInfo");
+                              if(null != jsonStr){
+//                                LoginUser loginUser = LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
                                 RouteUtils.pushReplacePage(context,MainPage());
                               }else{
                                 RouteUtils.pushReplacePage(context,LoginPage());

@@ -1,14 +1,16 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
 
 class PictureShow extends StatelessWidget {
-  final List<String> picList;
+  final List<LocalMedia> imageUrl;
   final int columnSize;
   final bool isLocal;
 
   PictureShow({
-    @required
-    this.picList,
+    @required this.imageUrl,
     this.isLocal = false,
     this.columnSize = 3,
   });
@@ -21,15 +23,15 @@ class PictureShow extends StatelessWidget {
         shrinkWrap: true,
         crossAxisCount: columnSize,
         children: List.generate(
-          picList!=null?picList.length:1,
-              (index) => GestureDetector(
+          imageUrl != null ? imageUrl.length : 1,
+          (index) => GestureDetector(
             child: Padding(
               padding: const EdgeInsets.all(0.5),
               child: buildImage(index),
             ),
             onTap: () {
               Navigator.of(context).push(
-                NinePicture(isLocal,picList, index),
+                NinePicture(isLocal, imageUrl, index),
               );
             },
           ),
@@ -38,20 +40,30 @@ class PictureShow extends StatelessWidget {
     );
   }
 
-  buildImage(int index) {
+  Future checkPictureISLocal(int index) async{
+    File txt = File(imageUrl[index].realPath);
+    return await txt.exists(); //返回真假
+  }
 
-    if(isLocal){
-      return Image.asset(picList[index],fit: BoxFit.cover,key: Key(index.toString()),);
-    }else{
+  //
+   buildImage(int index){
+
+    if (imageUrl[index].mimeType!="") {
+      return Image.asset(
+        imageUrl[index].realPath,
+        fit: BoxFit.cover,
+        key: Key(index.toString()),
+      );
+    } else {
       return CachedNetworkImage(
         key: Key(index.toString()),
         fit: BoxFit.cover,
         alignment: Alignment.center,
         placeholder: (context, url) => CircularProgressIndicator(
 //                   backgroundColor: Colors.pink,
-        ),
+            ),
         errorWidget: (context, url, error) => Icon(Icons.error),
-        imageUrl: picList!=null?picList[index]:"12321",
+        imageUrl: imageUrl != null ? imageUrl[index].realPath==null?"":imageUrl[index].realPath : "12321",
       );
     }
   }
@@ -65,7 +77,7 @@ class NinePicture<T> extends PopupRoute<T> {
   int startX;
   int endX;
 
-  NinePicture(this.isLocal,this.picList, this.index, {this.barrierLabel});
+  NinePicture(this.isLocal, this.picList, this.index, {this.barrierLabel});
 
   @override
   Duration get transitionDuration => Duration(milliseconds: 2000);
@@ -100,7 +112,7 @@ class NinePicture<T> extends PopupRoute<T> {
             onTap: () {
               Navigator.pop(context);
             },
-            child: _PictureWidget(picList, index,isLocal),
+            child: _PictureWidget(picList, index, isLocal),
           ),
         ),
       ),
@@ -109,11 +121,11 @@ class NinePicture<T> extends PopupRoute<T> {
 }
 
 class _PictureWidget extends StatefulWidget {
-  final List picList;
+  final List<LocalMedia> picList;
   final int index;
   final isLocal;
 
-  _PictureWidget(this.picList, this.index,this.isLocal);
+  _PictureWidget(this.picList, this.index, this.isLocal);
 
   @override
   State createState() {
@@ -139,12 +151,13 @@ class _PictureWidgetState extends State<_PictureWidget> {
     return new Material(
       color: Colors.transparent,
       child: new Container(
+        padding: EdgeInsets.all(0),
         width: double.infinity,
         child: Stack(
           children: <Widget>[
             GestureDetector(
               child: Center(
-                child: buildImage(widget.isLocal,index),
+                child: _buildImage(index),
               ),
               onHorizontalDragDown: (detail) {
                 startX = detail.globalPosition.dx.toInt();
@@ -161,16 +174,19 @@ class _PictureWidgetState extends State<_PictureWidget> {
             Align(
               alignment: Alignment.bottomCenter,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
                   widget.picList.length,
-                      (i) => GestureDetector(
-                    child: CircleAvatar(
-                      foregroundColor: Theme.of(context).primaryColor,
-                      radius: 8.0,
-                      backgroundColor: index == i
-                          ? Theme.of(context).primaryColor
-                          : Colors.white,
+                  (i) => GestureDetector(
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: CircleAvatar(
+                        foregroundColor: Theme.of(context).primaryColor,
+                        radius: 4.0,
+                        backgroundColor: index == i
+                            ? Theme.of(context).primaryColor
+                            : Colors.white,
+                      ),
                     ),
                     onTap: () {
                       setState(() {
@@ -188,13 +204,17 @@ class _PictureWidgetState extends State<_PictureWidget> {
       ),
     );
   }
-  buildImage(bool isLocal,int index) {
 
-    if(isLocal){
-      return Image.asset(widget.picList[index],fit: BoxFit.cover,key: Key(index.toString()),);
-    }else{
+  _buildImage(int index) {
+    if (widget.picList[index].mimeType!="") {
+      return Image.asset(
+        widget.picList[index].realPath,
+        fit: BoxFit.cover,
+        key: Key(index.toString()),
+      );
+    } else {
       return CachedNetworkImage(
-        imageUrl: widget.picList[index],
+        imageUrl: widget.picList[index].path,
         fit: BoxFit.cover,
       );
     }

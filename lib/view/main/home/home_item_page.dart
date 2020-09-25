@@ -8,6 +8,7 @@ import 'package:flutter_dev/http/data_helper.dart';
 import 'package:flutter_dev/http/http_manager.dart';
 import 'package:flutter_dev/http/result_data.dart';
 import 'package:flutter_dev/router/route_util.dart';
+import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/list/CustomScrollViewTestRoute.dart';
 import 'package:flutter_dev/view/comm_views/list/comm_list_view.dart';
 import 'package:flutter_dev/view/main/home/grid_item.dart';
@@ -43,7 +44,7 @@ class HomeItemPageState extends State<HomeItemPage> {
     baseMap['menuId'] = "lnd";
 //    baseMap['']="";
     ResultData result =
-        await HttpManager.getInstance().get(Address.HOME_URL, baseMap);
+    await HttpManager.getInstance().get(Address.HOME_URL, baseMap);
     if(result.code != 200){
       CommUtils.showDialog(context, "提示", result.data, false,
           okOnPress: () {});
@@ -67,25 +68,32 @@ class HomeItemPageState extends State<HomeItemPage> {
   @override
   Widget build(BuildContext context) {
     ///网络获取数据
+    return buildBody();
+  }
 
-    return Container(
-      height: MediaQuery.of(context).size.height,
+  buildBody(){
+    if(itemHomes!=null && itemHomes.length>0){
+      return Container(
+        height: MediaQuery.of(context).size.height,
 //      padding: EdgeInsets.all(10),
-      alignment: Alignment.center,
-      color: Colors.grey[300],
-      child: SmartRefresher(
-        enablePullDown: true,
-        enablePullUp: true,
-        header: WaterDropHeader(
-          waterDropColor: Colors.blue,
+        alignment: Alignment.center,
+        color: Colors.grey[300],
+        child: SmartRefresher(
+          enablePullDown: true,
+          enablePullUp: true,
+          header: WaterDropHeader(
+            waterDropColor: Colors.blue,
+          ),
+          footer: footer,
+          child: buildListView(),
+          controller: mRefreshController,
+          onRefresh: onRefresh,
+          onLoading: onLoading,
         ),
-        footer: footer,
-        child: buildListView(),
-        controller: mRefreshController,
-        onRefresh: onRefresh,
-        onLoading: onLoading,
-      ),
-    );
+      );
+    }else{
+      return PageLoading();
+    }
   }
 
   Widget buildListView() {
