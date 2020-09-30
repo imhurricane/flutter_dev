@@ -4,10 +4,8 @@ import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/detail/detail_page.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
-import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
-import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -24,7 +22,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class CommListView extends StatefulWidget {
 
-  final EntryModel entryModel;
+   final EntryModel entryModel;
   CommListView(this.entryModel);
 
   @override
@@ -39,6 +37,7 @@ class CommListViewState extends State<CommListView> {
   PageInfo pageInfo = PageInfo();
   DetailPageInfo detailPageInfo;
   List<ListViewItem> viewItems;
+
   @override
   void initState() {
     super.initState();
@@ -46,8 +45,7 @@ class CommListViewState extends State<CommListView> {
     detailPageInfo = DetailPageInfo();
     pageInfo.pageNumber=1;
     pageInfo.pageSize=10;
-    initData();
-
+    initPageData();
   }
 
   @override
@@ -129,7 +127,22 @@ class CommListViewState extends State<CommListView> {
           detailPageInfo.dataType=viewItems[index].dataType;
           detailPageInfo.params=viewItems[index].params;
           detailPageInfo.id=viewItems[index].itemListViewContent.id;
-          RouteUtils.pushPage(context, DetailPage(detailPageInfo));
+          if(viewItems[index].dataType=="LIST"){
+//            widget.entryModel.dataType=viewItems[index].dataType;
+//            widget.entryModel.toPage=viewItems[index].detailPageId;
+            EntryModel temp = EntryModel()
+              ..toPage = viewItems[index].detailPageId
+              ..dataType = viewItems[index].dataType
+              ..title = widget.entryModel.title
+              ..params = widget.entryModel.params
+              ..secondLevel = widget.entryModel.secondLevel
+              ..icon = widget.entryModel.icon
+              ..isHtml = widget.entryModel.isHtml
+              ..xtm = widget.entryModel.xtm;
+            RouteUtils.pushPage(context, CommListView(temp));
+          }else if(viewItems[index].dataType=="DETAIL"){
+            RouteUtils.pushPage(context, DetailPage(detailPageInfo));
+          }
         },
         child: IntrinsicHeight(
           child: Container(
@@ -162,7 +175,7 @@ class CommListViewState extends State<CommListView> {
                       children: [
                         Html(
                           style: {"body":Style(alignment: Alignment.center,fontSize: FontSize.percent(130),color: Colors.black,fontWeight: FontWeight.w400)},
-                          data: viewItems[index].itemListViewContent.title,
+                          data: viewItems[index].itemListViewContent.title==null?"":viewItems[index].itemListViewContent.title,
                         ),
                         Offstage(
                           offstage: viewItems[index].itemListViewContent.describe!=null?false:true,
@@ -214,7 +227,7 @@ class CommListViewState extends State<CommListView> {
     setState(() {
       pageInfo.pageNumber++;
     });
-    await initData();
+    await initPageData();
     mRefreshController.loadComplete();
     mRefreshController.loadNoData();
   }
@@ -223,7 +236,7 @@ class CommListViewState extends State<CommListView> {
     setState(() {
       pageInfo.pageNumber=1;
     });
-    await initData();
+    await initPageData();
     mRefreshController.refreshCompleted();
   }
   Future<String> decodeStringFromAssets(String path) async {
@@ -232,17 +245,22 @@ class CommListViewState extends State<CommListView> {
     return htmlString;
   }
 
-  initData() async {
+  initPageData() async {
+    viewItems.clear();
+    print("----------------------");
     var baseMap = DataHelper.getBaseMap();
     baseMap.clear();///8aUUVC4cbmHyy6+2yB+/2A==
     Map<String, dynamic> user = StorageUtils.getModelWithKey("userInfo");
     if(null != user){
       debugPrint("page:"+widget.entryModel.toPage);
+      debugPrint("page:"+widget.entryModel.dataType);
       debugPrint("user:"+user.toString());
       baseMap['toPage']=widget.entryModel.toPage;
+      baseMap['pageId']=widget.entryModel.dataType;
       baseMap['pageSize']=pageInfo.pageSize;
       baseMap['pageNumber']=pageInfo.pageNumber;
       baseMap['yhxtm']=user['yhxtm'];
+
       if(widget.entryModel.params != null){
         baseMap.addAll(widget.entryModel.params);
       }
@@ -265,8 +283,12 @@ class CommListViewState extends State<CommListView> {
     }else{
 //      CommUtils.showDialog(context, "提示", "登录信息过期,请重新登录", false,
 //          okOnPress: () {});
-    }
 
+    }
+  }
+  @override
+  void dispose() {
+    super.dispose();
   }
 
 }

@@ -9,8 +9,11 @@ import 'package:flutter_dev/http/http_manager.dart';
 import 'package:flutter_dev/http/result_data.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
+import 'package:flutter_dev/view/comm_views/detail/detail_page.dart';
 import 'package:flutter_dev/view/comm_views/list/CustomScrollViewTestRoute.dart';
 import 'package:flutter_dev/view/comm_views/list/comm_list_view.dart';
+import 'package:flutter_dev/view/comm_views/list/second_menu.dart';
+import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
 import 'package:flutter_dev/view/main/home/grid_item.dart';
 import 'package:flutter_dev/view/main/home/item_home.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -41,7 +44,7 @@ class HomeItemPageState extends State<HomeItemPage> {
   initData() async {
     var baseMap = DataHelper.getBaseMap();
     baseMap.clear();
-    baseMap['menuId'] = "lnd";
+    baseMap['menuId'] = Address.MENU_ID;
 //    baseMap['']="";
     ResultData result =
     await HttpManager.getInstance().get(Address.HOME_URL, baseMap);
@@ -77,7 +80,7 @@ class HomeItemPageState extends State<HomeItemPage> {
         height: MediaQuery.of(context).size.height,
 //      padding: EdgeInsets.all(10),
         alignment: Alignment.center,
-        color: Colors.grey[300],
+        color: Colors.grey[100],
         child: SmartRefresher(
           enablePullDown: true,
           enablePullUp: true,
@@ -139,6 +142,7 @@ class HomeItemPageState extends State<HomeItemPage> {
   buildGridWidget() {
     return Container(
       margin: EdgeInsets.all(5),
+      color: Colors.grey[50],
       child: GridView.builder(
           itemCount: entryModels.length,
           primary: false,
@@ -157,9 +161,28 @@ class HomeItemPageState extends State<HomeItemPage> {
               child: Ink(
                 child: InkWell(
                   onTap: () {
-                    RouteUtils.pushPage(context, CommListView(entryModels[index]));
+                    if(entryModels[index].secondLevel == null || !entryModels[index].secondLevel){
+                      if(entryModels[index]?.dataType=="LIST"){
+                        RouteUtils.pushPage(context, CommListView(entryModels[index]));
+                      }else if(entryModels[index]?.dataType=="DETAIL"){
+                        DetailPageInfo detailPageInfo = DetailPageInfo()
+                          ..params = entryModels[index].params
+                          ..dataType = entryModels[index].dataType
+                          ..detailPageId = entryModels[index].toPage;
+                        print("detailPageInfo:"+detailPageInfo.toJson().toString());
+                        RouteUtils.pushPage(context, DetailPage(detailPageInfo));
+                      }
+                    }else{
+                      RouteUtils.pushPage(context, SecondMenu(entryModels[index]));
+                    }
                   },
                   child: Container(
+                    decoration: BoxDecoration(color: Colors.white, boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: Colors.grey[300],
+                      ),
+                    ]
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,

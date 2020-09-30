@@ -32,7 +32,7 @@ class EntryModel {
   String toPage;
   bool isHtml;
   bool secondLevel;
-  HashMap params;
+  HashMap<String,dynamic> params;
 
   EntryModel(
       {this.xtm,
