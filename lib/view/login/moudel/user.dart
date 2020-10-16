@@ -10,6 +10,7 @@ class LoginUser{
   String usernamecn;
   String orgxtm;
   String deptname;
+  Map<String,dynamic> permission;
 
   LoginUser(
       {this.msg,
@@ -21,7 +22,9 @@ class LoginUser{
         this.devicextm,
         this.usernamecn,
         this.orgxtm,
-        this.deptname});
+        this.deptname,
+        this.permission
+      });
 
   LoginUser.fromJson(Map<String, dynamic> json) {
     msg = json['msg'];
@@ -34,6 +37,7 @@ class LoginUser{
     usernamecn = json['usernamecn'];
     orgxtm = json['orgxtm'];
     deptname = json['deptname'];
+    permission = json['permission'];
   }
 
   Map<String, dynamic> toJson() {
@@ -48,6 +52,7 @@ class LoginUser{
     data['usernamecn'] = this.usernamecn;
     data['orgxtm'] = this.orgxtm;
     data['deptname'] = this.deptname;
+    data['permission'] = this.permission;
     return data;
   }
 }

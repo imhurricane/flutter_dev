@@ -204,7 +204,7 @@ class DetailPageState extends State<DetailPage>{
       Map<String, dynamic> json = jsonDecode(result.data);
       setState(() {
         detailData = DetailData.fromJson(json);
-        images = detailData.iconInfoList.localMedia;
+        images = detailData.iconInfoList?.localMedia;
       });
     } else {
       CommUtils.showDialog(context, "提示", "${result.data}", false,

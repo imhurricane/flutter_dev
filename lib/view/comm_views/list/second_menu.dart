@@ -11,6 +11,7 @@ import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/detail/detail_page.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
+import 'package:flutter_dev/view/main/home/entry_model.dart';
 import 'package:flutter_dev/view/main/home/grid_item.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -164,7 +165,7 @@ class SecondMenuState extends State<SecondMenu> {
   onLoading() async {
 //    mRefreshController.loadComplete();
 //    mRefreshController.loadNoData();
-  }
+}
 
   onRefresh() async {
     await initData();

@@ -68,6 +68,10 @@ dependencies:
   flutter_picker: 1.1.0
   # 时间格式转换 https://pub.dev/packages/date_format
   date_format: 1.0.8
+  #日历
+  flutter_calendar: ^0.0.8
+  flutter_custom_calendar: ^1.0.4+0.5
+  modal_progress_hud: ^0.1.3
   # 图片手势 https://pub.dev/packages/photo_view
   photo_view: 0.9.2
   # 相册多图选择 https://pub.dev/packages/photo

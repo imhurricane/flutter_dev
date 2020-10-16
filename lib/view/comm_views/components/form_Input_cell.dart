@@ -77,8 +77,8 @@ class FormInputCell extends StatefulWidget {
     this.textStyle = _textStyle,
     this.hintTextStyle= _hintTextStyle,
     this.textAlign= TextAlign.left,
-    this.border = InputBorder.none, //去掉下划线
-    this.hiddenLine = false,
+    this.border = InputBorder.none,
+    this.hiddenLine = false, //去掉下划线
     this.topAlign =false,
     this.bgColor = _bgColor,
 

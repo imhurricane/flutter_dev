@@ -19,7 +19,7 @@ class HttpManager {
   HttpManager._internal({String baseUrl}) {
     if (null == _dio) {
       _dio = new Dio(
-          new BaseOptions(baseUrl: Address.BASE_URL, connectTimeout: 6000));
+          new BaseOptions(baseUrl: Address.BASE_URL, connectTimeout: 30000));
       _dio.interceptors.add(new LogsInterceptors());
       _dio.interceptors.add(new ResponseInterceptors());
     }

@@ -4,6 +4,7 @@ import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/detail/detail_page.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
+import 'package:flutter_dev/view/main/home/entry_model.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
 import 'package:flutter/cupertino.dart';

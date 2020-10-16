@@ -20,6 +20,7 @@ class CommUtils {
         btnOkOnPress: okOnPress,
         btnOkText: "确定",
         btnCancelText: "取消",
+        dismissOnTouchOutside:false,
       )..show();
     } else {
       AwesomeDialog(
@@ -31,6 +32,7 @@ class CommUtils {
         desc: '$msg',
         btnOkOnPress: okOnPress,
         btnOkText: "确定",
+        dismissOnTouchOutside:false,
       )..show();
     }
   }

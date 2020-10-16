@@ -24,7 +24,7 @@ class IndexPageState extends State<IndexPage> {
   @override
   void initState() {
     super.initState();
-
+    user = StorageUtils.getModelWithKey("userInfo");
     mTimerUtil = new TimerUtil(mInterval: 100, mTotalTime: 5000);
     mTimerUtil.setOnTimerTickCallback((int tick) {
       setState(() {
@@ -38,7 +38,8 @@ class IndexPageState extends State<IndexPage> {
         }
       });
     });
-    readCacheData();
+//    readCacheData();
+    mTimerUtil.startCountDown();
   }
 
   readCacheData() async {

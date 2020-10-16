@@ -427,6 +427,7 @@ class LoginPageState extends State<LoginPage>
     baseMap['isjpush'] = "1";
     baseMap['registrationID'] = "";
     baseMap['appid'] = "";
+    baseMap['loginType'] = "app";
     baseMap['username'] = userTextEditingController.text.trim();
     baseMap['password'] = pwTextEditingController.text.trim();
     if (userTextEditingController.text.trim().length == 0) {

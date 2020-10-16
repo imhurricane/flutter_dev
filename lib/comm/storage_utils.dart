@@ -12,7 +12,7 @@ import 'package:flustars/flustars.dart';
 import 'encrypt_utils.dart';
 
 // aes 加密存储
-class StorageUtils {
+class StorageAESUtils {
 
   //存 String
   static Future<bool> saveString(String key, String value) {
@@ -91,7 +91,7 @@ class StorageUtils {
 }
 
 //不使用aes加密
-class StorageNoAESUtils {
+class StorageUtils {
   //存 String
   static Future<bool> saveString(String key, String value) {
     return SpUtil.putString(key, value);

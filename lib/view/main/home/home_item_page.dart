@@ -1,8 +1,11 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dev/comm/comm_utils.dart';
+import 'package:flutter_dev/comm/monitor_network_utils.dart';
+import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/http/address.dart';
 import 'package:flutter_dev/http/data_helper.dart';
 import 'package:flutter_dev/http/http_manager.dart';
@@ -10,13 +13,16 @@ import 'package:flutter_dev/http/result_data.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/detail/detail_page.dart';
-import 'package:flutter_dev/view/comm_views/list/CustomScrollViewTestRoute.dart';
 import 'package:flutter_dev/view/comm_views/list/comm_list_view.dart';
 import 'package:flutter_dev/view/comm_views/list/second_menu.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
+import 'package:flutter_dev/view/comm_views/offline/download_page.dart';
+import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:flutter_dev/view/main/home/grid_item.dart';
 import 'package:flutter_dev/view/main/home/item_home.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import 'entry_model.dart';
 
 class HomeItemPage extends StatefulWidget {
   @override
@@ -30,10 +36,8 @@ class HomeItemPageState extends State<HomeItemPage> {
   RefreshController mRefreshController = new RefreshController();
   ClassicFooter footer = new ClassicFooter();
   List<ItemHome> itemHomes = new List();
-
+  bool network = true;
   List<EntryModel> entryModels = new List();
-
-
 
   @override
   void initState() {
@@ -42,21 +46,54 @@ class HomeItemPageState extends State<HomeItemPage> {
   }
 
   initData() async {
-    var baseMap = DataHelper.getBaseMap();
-    baseMap.clear();
-    baseMap['menuId'] = Address.MENU_ID;
+    network = await MonitorNetworkUtils.isNetwork();
+    print('network:'+network.toString());
+    LoginUser user = LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
+    if (network) {
+      var baseMap = DataHelper.getBaseMap();
+      baseMap.clear();
+      baseMap['menuId'] = Address.MENU_ID;
 //    baseMap['']="";
-    ResultData result =
-    await HttpManager.getInstance().get(Address.HOME_URL, baseMap);
-    if(result.code != 200){
-      CommUtils.showDialog(context, "提示", result.data, false,
-          okOnPress: () {});
-    }else{
-      Map<String, dynamic> json = jsonDecode(result.data);
+      ResultData result =
+          await HttpManager.getInstance().get(Address.HOME_URL, baseMap);
+      if (result.code != 200) {
+        CommUtils.showDialog(context, "提示", result.data, false,
+            okOnPress: () {});
+      } else {
+        Map<String, dynamic> json = jsonDecode(result.data);
 
-      ItemGrid itemGrid = ItemGrid.fromJson(json);
-      debugPrint("json:"+result.data);
-      entryModels = itemGrid.entryModels;
+        ItemGrid itemGrid = ItemGrid.fromJson(json);
+        debugPrint("json:" + result.data);
+        entryModels = itemGrid.entryModels;
+        Map<String, String> gridItem = Map();
+        List<Map<String, String>> gridItems = new List<Map<String, String>>();
+        gridItems.add(gridItem);
+        ItemHome itemHome = ItemHome.grid(ViewType.gridView, gridItems);
+        itemHomes.clear();
+        itemHomes.add(itemHome);
+        List<EntryModel> newEntryModels = new List();
+//        LoginUser user =
+//            LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
+//        print("userPermission:" + user.toJson().toString());
+//        entryModels.forEach((element) {
+//          print("permission:" + element.permission);
+//          if (user.permission.containsKey(element.permission)) {
+//            newEntryModels.add(element);
+//          }
+//        });
+//        print('newEntryModels:'+newEntryModels[0].toJson().toString());
+        StorageUtils.saveModel("menu", itemGrid);
+        setState(() {});
+      }
+    } else {
+      entryModels.clear();
+      ItemGrid itemGrid = ItemGrid.fromJson(StorageUtils.getModelWithKey("menu"));
+      List<EntryModel> entryModelsTemp = itemGrid.entryModels;
+      for(int i = 0;i<entryModelsTemp.length;i++){
+        if (user.permission.containsKey(entryModelsTemp[i].permission)) {
+          entryModels.add(entryModelsTemp[i]);
+        }
+      }
       Map<String, String> gridItem = Map();
       List<Map<String, String>> gridItems = new List<Map<String, String>>();
       gridItems.add(gridItem);
@@ -65,7 +102,6 @@ class HomeItemPageState extends State<HomeItemPage> {
       itemHomes.add(itemHome);
       setState(() {});
     }
-
   }
 
   @override
@@ -74,8 +110,8 @@ class HomeItemPageState extends State<HomeItemPage> {
     return buildBody();
   }
 
-  buildBody(){
-    if(itemHomes!=null && itemHomes.length>0){
+  buildBody() {
+    if (itemHomes != null && itemHomes.length > 0) {
       return Container(
         height: MediaQuery.of(context).size.height,
 //      padding: EdgeInsets.all(10),
@@ -83,7 +119,7 @@ class HomeItemPageState extends State<HomeItemPage> {
         color: Colors.grey[100],
         child: SmartRefresher(
           enablePullDown: true,
-          enablePullUp: true,
+          enablePullUp: false,
           header: WaterDropHeader(
             waterDropColor: Colors.blue,
           ),
@@ -94,7 +130,7 @@ class HomeItemPageState extends State<HomeItemPage> {
           onLoading: onLoading,
         ),
       );
-    }else{
+    } else {
       return PageLoading();
     }
   }
@@ -161,40 +197,54 @@ class HomeItemPageState extends State<HomeItemPage> {
               child: Ink(
                 child: InkWell(
                   onTap: () {
-                    if(entryModels[index].secondLevel == null || !entryModels[index].secondLevel){
-                      if(entryModels[index]?.dataType=="LIST"){
+                    if (entryModels[index]?.dataType != null) {
+                      if (entryModels[index]?.dataType == "LIST") {
                         RouteUtils.pushPage(context, CommListView(entryModels[index]));
-                      }else if(entryModels[index]?.dataType=="DETAIL"){
+                      } else if (entryModels[index]?.dataType == "DETAIL") {
                         DetailPageInfo detailPageInfo = DetailPageInfo()
                           ..params = entryModels[index].params
                           ..dataType = entryModels[index].dataType
                           ..detailPageId = entryModels[index].toPage;
-                        print("detailPageInfo:"+detailPageInfo.toJson().toString());
                         RouteUtils.pushPage(context, DetailPage(detailPageInfo));
                       }
-                    }else{
+                    } else if(entryModels[index]?.secondLevel != null && entryModels[index].secondLevel){
                       RouteUtils.pushPage(context, SecondMenu(entryModels[index]));
+                    }else{
+                      //  离线菜单
+                      if(entryModels[index].id=="teak_download"){
+                        print('任务下载');
+                        RouteUtils.pushPage(context, DownloadPage());
+                      }else if(entryModels[index].id=="task_check"){
+                        print('任务排查');
+                      }else if(entryModels[index].id=="task_upload"){
+                        print('任务上传');
+                      }else if(entryModels[index].id=="task_statistics"){
+                        print('任务统计');
+                      }
                     }
                   },
                   child: Container(
-                    decoration: BoxDecoration(color: Colors.white, boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: Colors.grey[300],
-                      ),
-                    ]
-                    ),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: Colors.grey[300],
+                          ),
+                        ]),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: Image.network(
+                          child: network?Image.network(
                             "${Address.BaseImageURL + entryModels[index].icon}",
                             width: 44,
                             height: 44,
                             alignment: Alignment.center,
-                          ),
+                          ):
+                          Image.asset("resources/images${entryModels[index].icon.substring(entryModels[index].icon.lastIndexOf("/"))}",
+                              width: 44,height: 44,alignment: Alignment.center)
                         ),
                         Expanded(
                           child: Center(
