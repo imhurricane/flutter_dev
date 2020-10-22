@@ -3,7 +3,7 @@ class Address {
   //http://111.61.125.153:10001
   //http://192.168.1.170:7001
   static const String MENU_ID="zhsk_nav_app";
-  static const String BASE_URL = "http://192.168.1.170:7001";
+  static const String BASE_URL = "http://192.168.1.157:7001";
   static const String BASE_PACKAGE = "/appservlet/?requestdir=app.base.http&requesttype=";
   static const String OFFLINE_PACKAGE = "/appservlet/?requestdir=app.offline&requesttype=";
   static const String LOGIN_URL = "/appservlet/?requesttype=login";

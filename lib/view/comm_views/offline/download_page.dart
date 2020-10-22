@@ -12,6 +12,9 @@ import 'package:flutter_dev/http/result_data.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/components/progress.dart';
 import 'package:flutter_dev/view/comm_views/moudel/page_info.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/equipment.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/paper.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/riss.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -63,16 +66,16 @@ class DownloadPageState extends State<DownloadPage> {
                   },
                   icon: Icon(Icons.arrow_back_ios),
                 ),
-                actions: [
-                  IconButton(
-//                  padding: EdgeInsets.only(right: 20),
-                    icon: Icon(
-                      Icons.menu,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {},
-                  ),
-                ],
+//                actions: [
+//                  IconButton(
+////                  padding: EdgeInsets.only(right: 20),
+//                    icon: Icon(
+//                      Icons.menu,
+//                      color: Colors.white,
+//                    ),
+//                    onPressed: () {},
+//                  ),
+//                ],
               ),
             ];
           },
@@ -128,7 +131,7 @@ class DownloadPageState extends State<DownloadPage> {
                       mData[index].description,
                       style: TextStyle(fontSize: 16, color: Colors.black),
                     ),
-                    Text("状态:    ${mData[index].comp == "0" ? "未完成" : "已完成"}",
+                    Text("状态:    ${mData[index].comp == "1" ? "已完成" : "未完成"}",
                         style:
                             TextStyle(fontSize: 16, color: Colors.grey[600])),
                   ],
@@ -193,7 +196,7 @@ class DownloadPageState extends State<DownloadPage> {
   onDownloadTask(String taskXtm) async {
     var baseMap = DataHelper.getBaseMap();
     baseMap.clear();
-    baseMap['taskXtm'] = "ab648db4156448c3a53864dfc951d52c";
+    baseMap['taskXtm'] = taskXtm;
     ResultData result =
         await HttpManager.getInstance().get(Address.DownloadTask_URL, baseMap);
     if (result.code != 200) {
@@ -204,6 +207,39 @@ class DownloadPageState extends State<DownloadPage> {
         mRefreshController.loadNoData();
       }
       Navigator.of(context).pop();
+      Task task = Task.fromJson(json);
+      List<Paper> paperList = task.paper;
+      TaskProvider taskProvider = TaskProvider();
+      Map<String,dynamic> remove = task.toJson();
+      remove.remove("paper");
+      taskProvider.insertTask(Task.fromJson(remove));
+
+      paperList.forEach((element) {
+        PaperProvider paperProvider = PaperProvider();
+        List<Equipment> equipments = element.equipment;
+        Map<String,dynamic> map = element.toJson();
+        map.remove("equipment");
+        paperProvider.insertPaper(Paper.fromJson(map));
+
+        equipments.forEach((element) {
+          EquipmentProvider equProvider = EquipmentProvider();
+          List<Riss> rissList = element.riss;
+          Map<String,dynamic> map = element.toJson();
+          map.remove("riss");
+          equProvider.insertEquipment(Equipment.fromJson(map));
+
+          rissList.forEach((element) {
+            RissProvider rissProvider = RissProvider();
+            rissProvider.insertRiss(element);
+          });
+
+        });
+
+
+
+
+      });
+
       CommUtils.showDialog(context, "提示", "下载成功", true, okOnPress: () {});
       print('json:' + json.toString());
 
@@ -211,8 +247,6 @@ class DownloadPageState extends State<DownloadPage> {
     }
     setState(() {});
   }
-
-  handleNewDate(DateTime date) {}
 
   onLoading() async {
     pageInfo.pageNumber++;

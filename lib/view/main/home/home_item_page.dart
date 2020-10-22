@@ -17,6 +17,7 @@ import 'package:flutter_dev/view/comm_views/list/comm_list_view.dart';
 import 'package:flutter_dev/view/comm_views/list/second_menu.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
 import 'package:flutter_dev/view/comm_views/offline/download_page.dart';
+import 'package:flutter_dev/view/comm_views/offline/task_list.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:flutter_dev/view/main/home/grid_item.dart';
 import 'package:flutter_dev/view/main/home/item_home.dart';
@@ -212,10 +213,9 @@ class HomeItemPageState extends State<HomeItemPage> {
                     }else{
                       //  离线菜单
                       if(entryModels[index].id=="teak_download"){
-                        print('任务下载');
                         RouteUtils.pushPage(context, DownloadPage());
                       }else if(entryModels[index].id=="task_check"){
-                        print('任务排查');
+                        RouteUtils.pushPage(context, TaskListPage());
                       }else if(entryModels[index].id=="task_upload"){
                         print('任务上传');
                       }else if(entryModels[index].id=="task_statistics"){
