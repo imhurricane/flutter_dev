@@ -18,6 +18,7 @@ class MainFindPageState extends State<MainFindPage>
   TabController mTabController;
   List<VideoModel> videoList = [];
   List<VideoModel> videoList2 = [];
+  bool isShow = false;
 
   @override
   void initState() {
@@ -66,35 +67,49 @@ class MainFindPageState extends State<MainFindPage>
   }
 
   Widget buildBody() {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: Container(
-              color: Colors.black,
+    if(isShow){
+      return Scaffold(
+        body: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              child: Container(
+                color: Colors.black,
+              ),
             ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: buildTabView(),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 54,
-            bottom: 0,
-            child: buildTabBar(),
-          ),
-        ],
-      ),
-    );
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              child: buildTabView(),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 54,
+              bottom: 0,
+              child: buildTabBar(),
+            ),
+          ],
+        ),
+      );
+    }else{
+      return Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text("待开发"),
+        ),
+        body: Container(
+          alignment: Alignment.center,
+          child: Text("敬请期待"),
+        ),
+      );
+    }
+
   }
 
   buildTabView() {

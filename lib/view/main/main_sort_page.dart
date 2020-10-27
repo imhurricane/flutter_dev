@@ -27,6 +27,8 @@ class MainSortPageState extends State<MainSortPage>
   TabController mTabController;
   List<Widget> bodyPageList = [];
 
+  bool isShow = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,12 +41,26 @@ class MainSortPageState extends State<MainSortPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: NestedScrollViewRefreshIndicator(
-        onRefresh: refresh,
-        child: buildBody(),
-      ),
-    );
+    if(isShow){
+      return Scaffold(
+        body: NestedScrollViewRefreshIndicator(
+          onRefresh: refresh,
+          child: buildBody(),
+        ),
+      );
+    }else{
+      return Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text("待开发"),
+        ),
+        body: Container(
+          alignment: Alignment.center,
+          child: Text("敬请期待"),
+        ),
+      );
+    }
+
   }
 
   Future refresh() async {

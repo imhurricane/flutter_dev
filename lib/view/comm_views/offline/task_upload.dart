@@ -94,8 +94,6 @@ class UploadTaskPageState extends State<UploadTaskPage> {
                 if(mButtonStr.length>4){
                   return null;
                 }else{
-                  print('mTotalCount:'+mTotalCount.toString());
-                  print('mUploadCount:'+mUploadCount.toString());
                   if((mTotalCount-mUploadCount)>0){
                     uploadTask();
                   }else{
@@ -149,6 +147,7 @@ class UploadTaskPageState extends State<UploadTaskPage> {
               mUploadCount++;
               String str = (mUploadCount/mTotalCount).toString();
               str = str.substring(0,str.length>6?6:str.length);
+              print('str:'+str);
               progressValue = double.parse(str);
             }
             mButtonStr = "重新上传";

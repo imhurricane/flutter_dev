@@ -24,6 +24,7 @@ class TaskDetailPage extends StatefulWidget {
 }
 
 class TaskDetailPageState extends State<TaskDetailPage> {
+  ScrollController mListViewController;
   List<Task> mTaskList;
   List<Selects> mTaskSelects;
   int mTaskPosition;
@@ -43,6 +44,8 @@ class TaskDetailPageState extends State<TaskDetailPage> {
   @override
   void initState() {
     super.initState();
+    mListViewController = ScrollController();
+
     mTaskList = List();
     mPaperList = List();
     mEquipmentList = List();
@@ -172,6 +175,7 @@ class TaskDetailPageState extends State<TaskDetailPage> {
     return Expanded(
       child: Container(
         child: ListView.builder(
+          controller: mListViewController,
           itemBuilder: (BuildContext context, int index) {
             return buildRissItem(index);
           },
@@ -338,6 +342,8 @@ class TaskDetailPageState extends State<TaskDetailPage> {
       mRissList = await rissProvider
           .getRissByParentId(mEquipmentList[mEquPosition].xtm);
     }
+    ScrollPosition position = mListViewController.position;
+    position.jumpTo(0.0);
     setState(() {});
   }
 
@@ -437,8 +443,6 @@ class TaskDetailPageState extends State<TaskDetailPage> {
   }
 
   checkedCallBack(int index,Riss riss) async{
-
-
     RissProvider rissProvider = RissProvider();
     await rissProvider.update(riss,true);
     Map<String, dynamic> user = await StorageUtils.getModelWithKey("userInfo");

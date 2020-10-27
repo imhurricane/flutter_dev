@@ -11,6 +11,7 @@ const Color _textColor = Colors.white;
 const TextStyle _textStyle = TextStyle(fontSize: 18.0, color: _textColor);
 const TextStyle _hintTextStyle =
     TextStyle(fontSize: 15.0, color: Color(0xFFBBBBBB));
+typedef _TextFieldCallBack = void Function(String value);
 
 typedef _InputCallBack = void Function(String value);
 
@@ -20,6 +21,7 @@ class LoginTextField extends StatefulWidget {
   final String labelText; //top提示文字
   final TextEditingController controller;
   final TextInputType keyboardType;
+  final TextInputAction textInputAction;
   final FocusNode focusNode;
   final bool isPwd; //是否是密码，默认不是
   final Widget leftWidget; //左侧widget ，默认隐藏
@@ -32,6 +34,7 @@ class LoginTextField extends StatefulWidget {
   final String pwdClose; //自定义密码图片路径 闭眼
   final InputBorder border; //边框样式
   final bool isDense; //是否紧凑显示，默认false
+  final _TextFieldCallBack textFieldCallBack;
 
   const LoginTextField({
     Key key,
@@ -51,7 +54,9 @@ class LoginTextField extends StatefulWidget {
     this.pwdOpen,
     this.pwdClose,
     this.border,
+    this.textInputAction,
     this.isDense: false,
+    this.textFieldCallBack,
   }) : super(key: key);
 
   @override
@@ -114,6 +119,8 @@ class _LoginTextFieldState extends State<LoginTextField> {
           focusNode: _focusNode,
           controller: _textController,
           keyboardType: widget.keyboardType,
+          textInputAction: widget.textInputAction,
+          onSubmitted: widget.textFieldCallBack,
           style: _textStyle,
 //            // 数字、手机号限制格式为0到9(白名单)， 密码限制不包含汉字（黑名单）
 //            inputFormatters: (widget.keyboardType == TextInputType.number || widget.keyboardType == TextInputType.phone) ?

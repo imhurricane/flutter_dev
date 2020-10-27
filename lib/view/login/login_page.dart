@@ -32,7 +32,9 @@ class LoginPageState extends State<LoginPage>
   ///正常时边框颜色
   Color unSelectColor = Colors.white;
   TextEditingController userTextEditingController;
+  TextEditingController ipTextEditingController;
   TextEditingController pwTextEditingController;
+  FocusNode ipFocusNode = new FocusNode();
   FocusNode userFocusNode = new FocusNode();
   FocusNode passWordFocusNode = new FocusNode();
 
@@ -55,6 +57,7 @@ class LoginPageState extends State<LoginPage>
     super.initState();
     userTextEditingController = TextEditingController();
     pwTextEditingController = TextEditingController();
+    ipTextEditingController = TextEditingController();
     recognizer1 = TapGestureRecognizer();
     recognizer2 = TapGestureRecognizer();
 
@@ -140,6 +143,7 @@ class LoginPageState extends State<LoginPage>
       onTap: () {
         userFocusNode.unfocus();
         passWordFocusNode.unfocus();
+        ipFocusNode.unfocus();
       },
     );
   }
@@ -163,15 +167,20 @@ class LoginPageState extends State<LoginPage>
             SizedBox(
               height: 30,
             ),
+            buildInputWidget("resources/images/wifi.png", "请输入测试IP",
+                ipFocusNode, ipTextEditingController,TextInputAction.next),
+            SizedBox(
+              height: 20,
+            ),
             buildInputWidget("resources/images/user.png", "请输入用户名",
-                userFocusNode, userTextEditingController),
+                userFocusNode, userTextEditingController,TextInputAction.next),
             SizedBox(
               height: 20,
             ),
             buildInputWidget("resources/images/password.png", "请输入密码",
-                passWordFocusNode, pwTextEditingController),
+                passWordFocusNode, pwTextEditingController,TextInputAction.done),
 
-            buildAgreementWidget(),
+//            buildAgreementWidget(),
             SizedBox(
               height: 40,
             ),
@@ -196,7 +205,6 @@ class LoginPageState extends State<LoginPage>
           children: [
             Padding(
               padding: EdgeInsets.only(right: 14),
-
               ///圆角矩形裁切
               child: ClipRRect(
                 borderRadius: BorderRadius.all(Radius.circular(22)),
@@ -210,12 +218,11 @@ class LoginPageState extends State<LoginPage>
 
             ///颐达科技
             Text(
-              "Flutter Study",
+              "安全双控系统",
               style: TextStyle(
                   fontSize: 18,
                   color: Colors.white,
-
-                  ///引用原话的自定义字体
+                  ///引用圆滑的自定义字体
                   fontFamily: 'UniTortred'),
             ),
           ],
@@ -225,7 +232,7 @@ class LoginPageState extends State<LoginPage>
   }
 
   buildInputWidget(String img, String hintText, FocusNode focusNode,
-      TextEditingController controller) {
+      TextEditingController controller,TextInputAction textInputAction) {
     return Container(
       height: 44,
       margin: EdgeInsets.only(
@@ -237,12 +244,12 @@ class LoginPageState extends State<LoginPage>
           borderRadius: BorderRadius.all(Radius.circular(24)),
           border: Border.all(
               color: focusNode.hasFocus ? selectColor : unSelectColor)),
-      child: buildRowWidget(img, hintText, focusNode, controller),
+      child: buildRowWidget(img, hintText, focusNode, controller,textInputAction),
     );
   }
 
   buildRowWidget(String img, String hintText, FocusNode focusNode,
-      TextEditingController controller) {
+      TextEditingController controller,TextInputAction textInputAction) {
     return Row(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -265,19 +272,32 @@ class LoginPageState extends State<LoginPage>
         ),
         Expanded(
           child: LoginTextField(
-//            text: "asdas",
+            text: focusNode==ipFocusNode?Address.BASE_URL:"",
 //            labelText: "123123",
+            hintText: hintText,
             border: InputBorder.none,
             isShowDeleteBtn:true,
             controller: controller,
             focusNode: focusNode,
             isDense: true,
+            textInputAction: textInputAction,
+            textFieldCallBack: (value){
+              if(focusNode==ipFocusNode){
+                userFocusNode.requestFocus();
+              }else if(focusNode==userFocusNode){
+                passWordFocusNode.requestFocus();
+              }else{
+                ipFocusNode.unfocus();
+                userFocusNode.unfocus();
+                passWordFocusNode.unfocus();
+              }
+            },
             keyboardType: focusNode==userFocusNode?TextInputType.visiblePassword:TextInputType.visiblePassword,
 //            inputFormatters: [
 //              LengthLimitingTextInputFormatter(11),
 //            ],
           inputFormatters: [],
-            isPwd: focusNode==userFocusNode?false:true,
+            isPwd: focusNode==passWordFocusNode?true:false,
           ),
         ),
       ],
@@ -351,6 +371,7 @@ class LoginPageState extends State<LoginPage>
   buildLoginButton() {
     return InkWell(
       onTap: () {
+        ipFocusNode.unfocus();
         userFocusNode.unfocus();
         passWordFocusNode.unfocus();
         animationController.forward();
@@ -430,13 +451,19 @@ class LoginPageState extends State<LoginPage>
     baseMap['loginType'] = "app";
     baseMap['username'] = userTextEditingController.text.trim();
     baseMap['password'] = pwTextEditingController.text.trim();
-    if (userTextEditingController.text.trim().length == 0) {
+    String ip = ipTextEditingController.text.trim();
+    await StorageUtils.saveString("ip", ip);
+    Address.BASE_URL = ip;
+    if (ipTextEditingController.text.trim().length == 0) {
+      FlutterToast.showToast(msg: "IP不能为空!");
+      animationController.reverse();
+    } else if (userTextEditingController.text.trim().length == 0) {
       FlutterToast.showToast(msg: "用户名不能为空!");
       animationController.reverse();
     } else if (pwTextEditingController.text.trim().length == 0) {
       FlutterToast.showToast(msg: "密码不能为空!");
       animationController.reverse();
-    } else {
+    }else {
       result = await HttpManager.getInstance().get(Address.LOGIN_URL, baseMap);
 
       if (result.code == 200) {

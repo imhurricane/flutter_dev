@@ -3,6 +3,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_dev/comm/storage_utils.dart';
+import 'package:flutter_dev/http/address.dart';
 import '../main_find_page.dart';
 import '../home/home_page.dart';
 import '../mine/main_mine_page.dart';
@@ -27,6 +29,7 @@ class MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
+    initData();
   }
 
 
@@ -51,5 +54,14 @@ class MainPageState extends State<MainPage> {
         currentIndex: selectIndex,
       ),
     );
+  }
+
+  initData() async{
+    String ip = StorageUtils.getStringWithKey("ip");
+    if(ip != null && ip.length>0){
+      Address.BASE_URL=ip;
+    }else{
+      Address.BASE_URL = "http://192.168.1.166:7001";
+    }
   }
 }

@@ -1,10 +1,7 @@
-
-
-import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dev/comm/comm_utils.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'home_item_page.dart';
 
@@ -20,6 +17,8 @@ class MainHomePageState extends State<MainHomePage>
   List<Widget> bodyPageList = [];
   List<String> imageList = ["img0.jpg", "img1.jpg", "img2.jpg", "img3.jpg"];
 
+  DateTime _lastPressedAt;
+
   @override
   void initState() {
     super.initState();
@@ -28,10 +27,22 @@ class MainHomePageState extends State<MainHomePage>
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      // ignore: missing_return
-      onWillPop: () async{
-        CommUtils.showDialog(context, "提示", "确认退出APP吗?", false,okOnPress: (){});
-        return false;
+      onWillPop: () async {
+        if (_lastPressedAt == null) {
+          //首次点击提示...信息
+          FlutterToast.showToast(
+            msg: "连续双击退出APP",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+          );
+        }
+        if (_lastPressedAt == null ||
+            DateTime.now().difference(_lastPressedAt) > Duration(seconds: 1)) {
+          //两次点击间隔超过1秒则重新计时
+          _lastPressedAt = DateTime.now();
+          return false; // 不退出
+        }
+        return true; //退出
       },
       child: Scaffold(
         body: NestedScrollView(
@@ -130,5 +141,4 @@ class MainHomePageState extends State<MainHomePage>
       ),
     );
   }
-
 }

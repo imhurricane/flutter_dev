@@ -394,7 +394,15 @@ class HomeItemPageState extends State<HomeItemPage> with RouteAware{
   initCompleteTask() async{
     RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
     mRissCompleteList = await rissCompleteProvider.selectRissByIsUpload("0");
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void didPop() {
+    super.didPop();
+    mRissCompleteList = null;
   }
 
 }

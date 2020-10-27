@@ -22,7 +22,6 @@ abstract class BaseDbProvider {
   ///super 函数对父类进行初始化
   @mustCallSuper
   prepare(name, String createSql) async {
-    isTableExits = await DbManager.isTableExits(name);
     if (!isTableExits) {
       Database db = await DbManager.getCurrentDatabase();
       return await db.execute(createSql);
@@ -31,6 +30,7 @@ abstract class BaseDbProvider {
 
   @mustCallSuper
   open() async {
+    isTableExits = await DbManager.isTableExits(tableName());
     if (!isTableExits) {
       await prepare(tableName(), createTableString());
     }

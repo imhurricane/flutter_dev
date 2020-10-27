@@ -206,44 +206,39 @@ class DownloadPageState extends State<DownloadPage> {
       if (TextUtil.isEmpty(json.toString())) {
         mRefreshController.loadNoData();
       }
-      Navigator.of(context).pop();
+
       Task task = Task.fromJson(json);
       List<Paper> paperList = task.paper;
       TaskProvider taskProvider = TaskProvider();
       Map<String,dynamic> remove = task.toJson();
       remove.remove("paper");
-      taskProvider.insertTask(Task.fromJson(remove));
+      await taskProvider.insertTask(Task.fromJson(remove));
 
-      paperList.forEach((element) {
+      for(int i=0;i<paperList.length;i++){
+        Paper paper = paperList[i];
         PaperProvider paperProvider = PaperProvider();
-        List<Equipment> equipments = element.equipment;
-        Map<String,dynamic> map = element.toJson();
+        List<Equipment> equipments = paper.equipment;
+        Map<String,dynamic> map = paper.toJson();
         map.remove("equipment");
-        paperProvider.insertPaper(Paper.fromJson(map));
+        await paperProvider.insertPaper(Paper.fromJson(map));
 
-        equipments.forEach((element) {
+        for(int j=0;j<equipments.length;j++){
+          Equipment equipment = equipments[j];
           EquipmentProvider equProvider = EquipmentProvider();
-          List<Riss> rissList = element.riss;
-          Map<String,dynamic> map = element.toJson();
+          List<Riss> rissList = equipment.riss;
+          Map<String,dynamic> map = equipment.toJson();
           map.remove("riss");
-          equProvider.insertEquipment(Equipment.fromJson(map));
+          await equProvider.insertEquipment(Equipment.fromJson(map));
 
-          rissList.forEach((element) {
+          for(int k=0;k<rissList.length;k++){
+            Riss riss = rissList[k];
             RissProvider rissProvider = RissProvider();
-            rissProvider.insertRiss(element,false);
-          });
-
-        });
-
-
-
-
-      });
-
+            await rissProvider.insertRiss(riss,false);
+          }
+        }
+      }
+      Navigator.of(context).pop();
       CommUtils.showDialog(context, "提示", "下载成功", true, okOnPress: () {});
-      print('json:' + json.toString());
-
-
     }
     setState(() {});
   }
