@@ -1,9 +1,15 @@
+import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dev/view/comm_views/components/spinner_drop_down.dart';
+import 'package:flutter_dev/comm/comm_utils.dart';
+import 'package:flutter_dev/comm/storage_utils.dart';
+import 'package:flutter_dev/view/comm_views/components/spinner.dart';
+import 'package:flutter_dev/view/comm_views/components/task_check_view.dart';
+import 'package:flutter_dev/view/comm_views/moudel/selects.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/equipment.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/paper.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/riss_complete.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/task.dart';
 
 class TaskDetailPage extends StatefulWidget {
@@ -19,19 +25,19 @@ class TaskDetailPage extends StatefulWidget {
 
 class TaskDetailPageState extends State<TaskDetailPage> {
   List<Task> mTaskList;
-  List<String> mTaskNames;
+  List<Selects> mTaskSelects;
   int mTaskPosition;
 
   List<Paper> mPaperList;
-  List<String> mPaperNames;
+  List<Selects> mPaperSelects;
   int mPaperPosition;
 
   List<Equipment> mEquipmentList;
-  List<String> mEquNames;
   int mEquPosition;
+  List<Selects> mEquipmentSelects;
 
   List<Riss> mRissList;
-  List<String> mRissNames;
+  List<Selects> mRissSelects;
   int mRissPosition;
 
   @override
@@ -42,16 +48,18 @@ class TaskDetailPageState extends State<TaskDetailPage> {
     mEquipmentList = List();
     mRissList = List();
 
-    mTaskNames = List();
+    mTaskSelects = List();
     mTaskPosition = 0;
 
-    mPaperNames = List();
+    mPaperSelects = List();
     mPaperPosition = 0;
 
-    mEquNames = List();
+    mEquipmentSelects = List();
     mEquPosition = 0;
 
-    initData();
+    mRissSelects = List();
+
+    initTaskData();
   }
 
   @override
@@ -71,7 +79,6 @@ class TaskDetailPageState extends State<TaskDetailPage> {
         padding: const EdgeInsets.all(4.0),
         child: Column(
           children: [
-//            SizedBox(height: 4,),
             buildTaskSpinner(),
             SizedBox(
               height: 4,
@@ -84,7 +91,77 @@ class TaskDetailPageState extends State<TaskDetailPage> {
             SizedBox(
               height: 4,
             ),
+            Column(
+              children: [
+                Container(
+                    margin: EdgeInsets.only(left: 36, right: 36),
+                    width: double.infinity,
+                    child: Text(
+                      "排查项目",
+                      style: TextStyle(color: Colors.lightBlue),
+                    )),
+                Container(
+                  margin: EdgeInsets.only(left: 36, right: 36),
+                  height: 1,
+                  color: Colors.lightBlue,
+                ),
+              ],
+            ),
             buildRiss(),
+            Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(left: 36, right: 36),
+                  height: 1,
+                  color: Colors.lightBlue,
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ButtonBar(
+                  children: [
+                    RaisedButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      color: Colors.lightBlue,
+                      textColor: Colors.white,
+                      splashColor: Colors.grey,
+                      child: Text(" 上一设备 "),
+                      onPressed: () {
+                        preTask(2);
+                      },
+                    ),
+                    RaisedButton(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      color: Colors.lightBlue,
+                      textColor: Colors.white,
+                      splashColor: Colors.grey,
+                      child: Text(" 下一设备 "),
+                      onPressed: () {
+                        nextTask(2);
+                      },
+                    ),
+                    RaisedButton(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      color: Colors.lightBlue,
+                      textColor: Colors.white,
+                      splashColor: Colors.grey,
+                      child: Text(" 校验数据 "),
+                      onPressed: () {
+                        checkTaskPaperIsComplete();
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -106,136 +183,162 @@ class TaskDetailPageState extends State<TaskDetailPage> {
 
   buildRissItem(index) {
     return Container(
-      child: Row(
-        children: [
-          Text(mRissList[index].riskfactors),
-        ],
+      decoration: BoxDecoration(
+          border:
+              Border(bottom: BorderSide(width: 1, color: Colors.grey[300]))),
+      child: TaskCheck(
+        riss: mRissList[index],
+        checkedCallBack: (riss) {
+          checkedCallBack(index,riss);
+        },
       ),
     );
   }
 
   buildTaskSpinner() {
-    if (mTaskNames.length > 0) {
-      return SpinnerDropDown(
-        mData: mTaskNames,
-        mDataPosition: mTaskPosition,
-        selectCallBack: (value) {
-          for (int i = 0; i < mTaskList.length; i++) {
-            if (mTaskNames[i] == value) {
-              mTaskPosition = i;
-            }
-          }
-          setState(() {});
-        },
-        nextCallBack: () {
-          nextTask(0);
-        },
-        preCallBack: () {
-          preTask(0);
-        },
-      );
-    } else {
-      return Container();
-    }
+    return FromSpinnerSearch(
+      selects: mTaskSelects,
+      selectCallBack: (select) {
+        selectCallBack(select, 0);
+      },
+      nextCallBack: () {
+        nextTask(0);
+      },
+      preCallBack: () {
+        preTask(0);
+      },
+    );
   }
 
   buildPaperSpinner() {
-    if (mPaperNames.length > 0) {
-      return SpinnerDropDown(
-        mData: mPaperNames,
-        mDataPosition: mPaperPosition,
-        selectCallBack: (value) {
-          for (int i = 0; i < mPaperNames.length; i++) {
-            if (mPaperNames[i] == value) {
-              mPaperPosition = i;
-            }
-          }
-          setState(() {});
-        },
-        nextCallBack: () {
-          nextTask(1);
-        },
-        preCallBack: () {
-          preTask(1);
-        },
-      );
-    } else {
-      return Container();
-    }
+    return FromSpinnerSearch(
+      selects: mPaperSelects,
+      selectCallBack: (select) {
+        selectCallBack(select, 1);
+      },
+      nextCallBack: () {
+        nextTask(1);
+      },
+      preCallBack: () {
+        preTask(1);
+      },
+    );
   }
 
   buildEquipmentSpinner() {
-    if (mEquNames.length > 0) {
-      return SpinnerDropDown(
-        mData: mEquNames,
-        mDataPosition: mEquPosition,
-        selectCallBack: selectEqu,
-        nextCallBack: () {
-          nextTask(2);
-        },
-        preCallBack: () {
-          preTask(2);
-        },
-      );
-    } else {
-      return Container();
+    return FromSpinnerSearch(
+      selects: mEquipmentSelects,
+      selectCallBack: (select) {
+        selectCallBack(select, 2);
+      },
+      nextCallBack: () {
+        nextTask(2);
+      },
+      preCallBack: () {
+        preTask(2);
+      },
+    );
+  }
+
+  selectCallBack(select, index) async {
+    switch (index) {
+      case 0:
+        mTaskPosition = mTaskSelects.lastIndexOf(select);
+        mTaskSelects.forEach((element) {
+          element.isChecked = false;
+        });
+        mTaskSelects[mTaskPosition].isChecked = true;
+        await initPaperData();
+        await initEquipmentData();
+        await initRissData();
+        break;
+      case 1:
+        mPaperPosition = mPaperSelects.lastIndexOf(select);
+        mPaperSelects.forEach((element) {
+          element.isChecked = false;
+        });
+        mPaperSelects[mPaperPosition].isChecked = true;
+        await initEquipmentData();
+        await initRissData();
+        break;
+      case 2:
+        mEquPosition = mEquipmentSelects.lastIndexOf(select);
+        mEquipmentSelects.forEach((element) {
+          element.isChecked = false;
+        });
+        mEquipmentSelects[mEquPosition].isChecked = true;
+        await initRissData();
+        break;
     }
   }
 
-  initData() async {
+  initTaskData() async {
     TaskProvider taskProvider = TaskProvider();
     mTaskList = await taskProvider.getAllTask();
-    mTaskNames.clear();
     mTaskList.forEach((element) {
-      mTaskNames.add(element.description);
       if (element.xtm == widget.task.xtm) {
         mTaskPosition = mTaskList.indexOf(element);
       }
+      Selects selects = Selects();
+      selects.desc = element.description;
+      selects.isChecked = false;
+      mTaskSelects.add(selects);
     });
-
+    mTaskSelects[mTaskPosition].isChecked = true;
     await initPaperData();
-
     await initEquipmentData();
     await initRissData();
-
     setState(() {});
   }
 
-  selectEqu(value) async{
-      for (int i = 0; i < mEquNames.length; i++) {
-        if (mEquNames[i] == value) {
-          mEquPosition = i;
-        }
-      }
-      await initRissData();
-      setState(() {});
-
-  }
-
-
   initPaperData() async {
-    mPaperNames.clear();
+    mPaperSelects.clear();
+    mPaperList.clear();
     PaperProvider paperProvider = PaperProvider();
-    mPaperList = await paperProvider.getPaperByParentId(widget.task.xtm);
+    mPaperList =
+        await paperProvider.getPaperByParentId(mTaskList[mTaskPosition].xtm);
     mPaperList.forEach((element) {
-      mPaperNames.add(element.description);
+      Selects selects = Selects();
+      selects.desc = element.description;
+      selects.isChecked = false;
+      mPaperSelects.add(selects);
     });
+    if (mPaperSelects.length > 0) {
+      mPaperPosition = 0;
+      mPaperSelects[mPaperPosition].isChecked = true;
+    }
+    setState(() {});
   }
 
   initEquipmentData() async {
-    mEquNames.clear();
+    mEquipmentList.clear();
+    mEquipmentSelects.clear();
     EquipmentProvider equipmentProvider = EquipmentProvider();
-    mEquipmentList =
-        await equipmentProvider.getEquipmentByTaskId(widget.task.xtm);
-    mEquipmentList.forEach((element) {
-      mEquNames.add(element.description);
-    });
+    if (mPaperList.length > mPaperPosition) {
+      mEquipmentList = await equipmentProvider
+          .getEquipmentByParentId(mPaperList[mPaperPosition].xtm);
+      mEquipmentList.forEach((element) {
+        Selects selects = Selects();
+        selects.desc = element.description;
+        selects.isChecked = false;
+        mEquipmentSelects.add(selects);
+      });
+      if (mEquipmentSelects.length > 0) {
+        mEquPosition = 0;
+        mEquipmentSelects[mEquPosition].isChecked = true;
+      }
+    }
+    setState(() {});
   }
 
   initRissData() async {
+    mRissList.clear();
     RissProvider rissProvider = RissProvider();
-    mRissList =
-        await rissProvider.getRissByParentId(mEquipmentList[mEquPosition].xtm);
+    if (mEquipmentList.length > mEquPosition) {
+      mRissList = await rissProvider
+          .getRissByParentId(mEquipmentList[mEquPosition].xtm);
+    }
+    setState(() {});
   }
 
   nextTask(int index) async {
@@ -243,24 +346,47 @@ class TaskDetailPageState extends State<TaskDetailPage> {
       case 0:
         if (mTaskPosition < mTaskList.length - 1) {
           mTaskPosition++;
+          mTaskSelects.forEach((element) {
+            element.isChecked = false;
+          });
+          mTaskSelects[mTaskPosition].isChecked = true;
+          await initPaperData();
+          await initEquipmentData();
+          await initRissData();
+        } else {
+          CommUtils.showDialog(context, "提示", "已经最后一个任务", false,
+              okOnPress: () {});
         }
-        await initPaperData();
         break;
       case 1:
         if (mPaperPosition < mPaperList.length - 1) {
           mPaperPosition++;
+          mPaperSelects.forEach((element) {
+            element.isChecked = false;
+          });
+          mPaperSelects[mPaperPosition].isChecked = true;
+          await initEquipmentData();
+          await initRissData();
+        } else {
+          CommUtils.showDialog(context, "提示", "已经最后一个试卷", false,
+              okOnPress: () {});
         }
-        await initEquipmentData();
-        await initRissData();
+
         break;
       case 2:
         if (mEquPosition < mEquipmentList.length - 1) {
           mEquPosition++;
+          mEquipmentSelects.forEach((element) {
+            element.isChecked = false;
+          });
+          mEquipmentSelects[mEquPosition].isChecked = true;
+          await initRissData();
+        } else {
+          CommUtils.showDialog(context, "提示", "已经最后一个设备", false,
+              okOnPress: () {});
         }
-        await initRissData();
         break;
     }
-    setState(() {});
   }
 
   preTask(int index) async {
@@ -268,20 +394,104 @@ class TaskDetailPageState extends State<TaskDetailPage> {
       case 0:
         if (mTaskPosition > 0) {
           mTaskPosition--;
+          mTaskSelects.forEach((element) {
+            element.isChecked = false;
+          });
+          mTaskSelects[mTaskPosition].isChecked = true;
+          await initPaperData();
+          await initEquipmentData();
+          await initRissData();
+        } else {
+          CommUtils.showDialog(context, "提示", "已经第一个任务", false,
+              okOnPress: () {});
         }
         break;
       case 1:
         if (mPaperPosition > 0) {
           mPaperPosition--;
+          mPaperSelects.forEach((element) {
+            element.isChecked = false;
+          });
+          mPaperSelects[mPaperPosition].isChecked = true;
+          await initEquipmentData();
+          await initRissData();
+        } else {
+          CommUtils.showDialog(context, "提示", "已经第一个试卷", false,
+              okOnPress: () {});
         }
         break;
       case 2:
         if (mEquPosition > 0) {
           mEquPosition--;
+          mEquipmentSelects.forEach((element) {
+            element.isChecked = false;
+          });
+          mEquipmentSelects[mEquPosition].isChecked = true;
+          await initRissData();
+        } else {
+          CommUtils.showDialog(context, "提示", "已经第一个设备", false,
+              okOnPress: () {});
         }
-        await initRissData();
         break;
     }
-    setState(() {});
   }
+
+  checkedCallBack(int index,Riss riss) async{
+
+
+    RissProvider rissProvider = RissProvider();
+    await rissProvider.update(riss,true);
+    Map<String, dynamic> user = await StorageUtils.getModelWithKey("userInfo");
+    RissComplete rissComplete = RissComplete();
+    rissComplete.xtm=riss.xtm;
+    rissComplete.errdetail=riss.errdetail;
+    rissComplete.parentxtm=riss.parentxtm;
+    rissComplete.rwxtm=riss.rwxtm;
+    rissComplete.pjjb=riss.pjjb;
+    rissComplete.riskfactors=riss.riskfactors;
+    rissComplete.fxffcs=riss.fxffcs;
+    rissComplete.inactivemesure=riss.inactivemesure;
+    rissComplete.activemesure=riss.activemesure;
+    rissComplete.havemesure=riss.havemesure;
+    rissComplete.checkData=DateUtil.formatDate(DateTime.now(), format: "yyyy-MM-dd HH:mm:ss");;
+    rissComplete.isUpload="0";
+    rissComplete.yhXtm=user['yhxtm'];
+    RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
+    rissCompleteProvider.insertRiss(rissComplete);
+    setState(() {
+      mRissList[index] = riss;
+    });
+  }
+
+  checkTaskPaperIsComplete() async{
+      EquipmentProvider equipmentProvider = EquipmentProvider();
+      List<Equipment> equipmentList = await equipmentProvider.getEquipmentByParentId(mPaperList[mPaperPosition].xtm);
+
+      bool isComplete = false;
+      for(int i =0;i<equipmentList.length;i++){
+        RissProvider rissProvider = RissProvider();
+        List<Riss> rissList = await rissProvider.getRissByParentId(equipmentList[i].xtm);
+        bool tempBool = true;
+
+        for(int j = 0;j<rissList.length;j++){
+          if(rissList[j].activemesure=="1" || rissList[j].inactivemesure =="1"||rissList[j].havemesure=="1"){
+            tempBool=true;
+          }else{
+            tempBool = false;
+            break;
+          }
+        }
+        isComplete = tempBool;
+        if(!tempBool){
+          break;
+        }
+      }
+      if(isComplete){
+        CommUtils.showDialog(context, "提示", "当前试卷已完成", false,okOnPress: (){});
+      }else{
+        CommUtils.showDialog(context, "提示", "当前试卷未完成，请前往查看", false,okOnPress: (){});
+      }
+  }
+
+
 }

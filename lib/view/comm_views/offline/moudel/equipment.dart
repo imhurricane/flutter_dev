@@ -102,7 +102,9 @@ class EquipmentProvider extends BaseDbProvider{
   ///查询数据
   Future selectEquipmentByParentId(String parentId) async {
     Database db = await getDataBase();
-    return await db.rawQuery("select * from $name where $columnParentxtm = '$parentId'");
+    String sql = "select * from $name where $columnParentxtm = '$parentId' ";
+    print('sql:'+sql);
+    return await db.rawQuery(sql);
   }
   ///查询数据
   Future selectEquipmentByTaskId(String parentId) async {

@@ -2,7 +2,7 @@
 import 'package:flutter_dev/db/base_db_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-class Riss {
+class RissComplete {
   String xtm;
   String errdetail;
   String parentxtm;
@@ -13,8 +13,11 @@ class Riss {
   String inactivemesure;
   String activemesure;
   String havemesure;
+  String checkData;
+  String isUpload;
+  String yhXtm;
 
-  Riss(
+  RissComplete(
       {this.xtm,
         this.errdetail,
         this.parentxtm,
@@ -24,9 +27,13 @@ class Riss {
         this.fxffcs,
         this.inactivemesure,
         this.activemesure,
-        this.havemesure});
+        this.havemesure,
+        this.checkData,
+        this.isUpload,
+        this.yhXtm,
+      });
 
-  Riss.fromJson(Map<String, dynamic> json) {
+  RissComplete.fromJson(Map<String, dynamic> json) {
     xtm = json['xtm'];
     errdetail = json['errdetail'];
     parentxtm = json['parentxtm'];
@@ -37,6 +44,9 @@ class Riss {
     inactivemesure = json['inactivemesure'];
     activemesure = json['activemesure'];
     havemesure = json['havemesure'];
+    checkData = json['checkData'];
+    isUpload = json['isUpload'];
+    yhXtm = json['yhXtm'];
   }
 
   Map<String, dynamic> toJson() {
@@ -51,14 +61,17 @@ class Riss {
     data['inactivemesure'] = this.inactivemesure;
     data['activemesure'] = this.activemesure;
     data['havemesure'] = this.havemesure;
+    data['checkData'] = this.checkData;
+    data['isUpload'] = this.isUpload;
+    data['yhXtm'] = this.yhXtm;
     return data;
   }
 }
 
-class RissProvider extends BaseDbProvider{
+class RissCompleteProvider extends BaseDbProvider{
 
   ///表名
-  final String name = 'Riss';
+  final String name = 'RissComplete';
 
   final String columnId = "xtm";
   final String columnRwxtm = "rwxtm";
@@ -70,6 +83,9 @@ class RissProvider extends BaseDbProvider{
   final String columnInactivemesure = "inactivemesure";
   final String columnActivemesure = "activemesure";
   final String columnHavemesure = "havemesure";
+  final String columnCheckData = "checkData";
+  final String columnIsUpload = "isUpload";
+  final String columnYhXtm = "yhXtm";
 
   @override
   tableName() {
@@ -89,6 +105,9 @@ class RissProvider extends BaseDbProvider{
         $columnFxffcs text not null,
         $columnInactivemesure text not null,
         $columnActivemesure text not null,
+        $columnCheckData text not null,
+        $columnIsUpload text not null,
+        $columnYhXtm text not null,
         $columnHavemesure text not null)
       ''';
   }
@@ -99,6 +118,18 @@ class RissProvider extends BaseDbProvider{
     return await db.rawQuery("select * from $name where $columnId = '$id'");
   }
 
+  ///查询数据
+  Future<List<RissComplete>> selectRissByIsUpload(String isUpload) async {
+    Database db = await getDataBase();
+    var mapList = await db.rawQuery("select * from $name where $columnIsUpload = '$isUpload'");
+    var count  = mapList.length;
+    List<RissComplete> list= List<RissComplete>();
+    for(int i=0;i<count;i++){
+      list.add(RissComplete.fromJson(mapList[i]));
+    }
+    return list;
+  }
+
   //查询数据库所有
   Future<List<Map<String, dynamic>>> selectMapList() async {
     var db = await getDataBase();
@@ -107,30 +138,33 @@ class RissProvider extends BaseDbProvider{
   }
 
   //获取数据库里所有
-  Future<List<Riss>> getAllRiss() async{
+  Future<List<RissComplete>> getAllRiss() async{
     var mapList = await selectMapList();
     var count  = mapList.length;
-    List<Riss> list= List<Riss>();
+    List<RissComplete> list= List<RissComplete>();
     for(int i=0;i<count;i++){
-      list.add(Riss.fromJson(mapList[i]));
+      list.add(RissComplete.fromJson(mapList[i]));
     }
     return list;
   }
 
   //根据id查询
-  Future<Riss> getRissById(String id) async {
-    var mapList = await selectRissById(id); // Get 'Map List' from database
-    var user = Riss.fromJson(mapList[id]);
-    return user;
+  Future<RissComplete> getRissById(String id) async {
+    RissComplete rissComplete;
+    List<Map<String,dynamic>> mapList = await selectRissById(id); // Get 'Map List' from database
+    if(mapList.length==1){
+      rissComplete = RissComplete.fromJson(mapList[0]);
+    }
+    return rissComplete;
   }
 
   //增加数据
-  Future<int> insertRiss(Riss riss,bool isUpdateCom) async {
+  Future<int> insertRiss(RissComplete riss) async {
     var db = await getDataBase();
     var result;
     List<Map<String,dynamic>> maps = await selectRissById(riss.xtm);
     if(maps.length>0){
-      result = await update(riss,isUpdateCom);
+      result = await update(riss);
     }else{
       result = await db.insert(name, riss.toJson());
     }
@@ -138,36 +172,27 @@ class RissProvider extends BaseDbProvider{
   }
 
   //更新数据
-  Future<int> update(Riss riss,bool isUpdateCom) async {
+  Future<int> update(RissComplete riss) async {
     var database = await getDataBase();
-    String sql = "update $name set "
-        "$columnId = ?,"
-        "$columnRwxtm = ?,"
-        "$columnErrdetail = ?,"
-        "$columnParentxtm = ?,"
-        "$columnPjjb = ?,"
-        "$columnRiskfactors = ?,"
-        "$columnFxffcs = ?";
-    List list = new List();
-    list.add(riss.xtm);
-    list.add(riss.rwxtm);
-    list.add(riss.errdetail);
-    list.add(riss.parentxtm);
-    list.add(riss.pjjb);
-    list.add(riss.riskfactors);
-    list.add(riss.fxffcs);
-
-    if(isUpdateCom){
-      sql += ",$columnInactivemesure = ?,"
-      "$columnActivemesure = ?,"
-      "$columnHavemesure = ?";
-      list.add(riss.inactivemesure);
-      list.add(riss.activemesure);
-      list.add(riss.havemesure);
-    }
-    sql += " where $columnId= ?";
-    list.add(riss.xtm);
-    var result = await database.rawUpdate(sql,list);
+    var result = await database.rawUpdate(
+        "update $name set "
+            "$columnId = ?,"
+            "$columnRwxtm = ?,"
+            "$columnErrdetail = ?,"
+            "$columnParentxtm = ?,"
+            "$columnPjjb = ?,"
+            "$columnRiskfactors = ?,"
+            "$columnFxffcs = ?,"
+            "$columnInactivemesure = ?,"
+            "$columnActivemesure = ?,"
+            "$columnCheckData = ?,"
+            "$columnIsUpload = ?,"
+            "$columnYhXtm = ?,"
+            "$columnHavemesure = ?"
+            " where $columnId= ?",
+        [riss.xtm,riss.rwxtm,riss.errdetail,riss.parentxtm,riss.pjjb,riss.riskfactors,
+          riss.fxffcs,riss.inactivemesure,riss.activemesure,
+          riss.checkData,riss.isUpload,riss.yhXtm,riss.havemesure,riss.xtm]);
     return result;
   }
 
@@ -184,12 +209,12 @@ class RissProvider extends BaseDbProvider{
     return await db.rawQuery("select * from $name where $columnParentxtm = '$parentId'");
   }
 
-  Future<List<Riss>> getRissByParentId(String parentId) async{
+  Future<List<RissComplete>> getRissByParentId(String parentId) async{
     var mapList = await selectRissByParentId(parentId);
     var count = mapList.length;
-    List<Riss> list = List<Riss>();
+    List<RissComplete> list = List<RissComplete>();
     for (int i = 0; i < count; i++) {
-      list.add(Riss.fromJson(mapList[i]));
+      list.add(RissComplete.fromJson(mapList[i]));
     }
     return list;
   }

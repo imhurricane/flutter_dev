@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
@@ -10,6 +9,7 @@ import 'package:flutter_dev/http/address.dart';
 import 'package:flutter_dev/http/data_helper.dart';
 import 'package:flutter_dev/http/http_manager.dart';
 import 'package:flutter_dev/http/result_data.dart';
+import 'package:flutter_dev/main.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/detail/detail_page.dart';
@@ -17,7 +17,9 @@ import 'package:flutter_dev/view/comm_views/list/comm_list_view.dart';
 import 'package:flutter_dev/view/comm_views/list/second_menu.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
 import 'package:flutter_dev/view/comm_views/offline/download_page.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/riss_complete.dart';
 import 'package:flutter_dev/view/comm_views/offline/task_list.dart';
+import 'package:flutter_dev/view/comm_views/offline/task_upload.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:flutter_dev/view/main/home/grid_item.dart';
 import 'package:flutter_dev/view/main/home/item_home.dart';
@@ -32,7 +34,7 @@ class HomeItemPage extends StatefulWidget {
   }
 }
 
-class HomeItemPageState extends State<HomeItemPage> {
+class HomeItemPageState extends State<HomeItemPage> with RouteAware{
 //  List<String> imageList = ["img0.jpg", "img1.jpg", "img2.jpg", "img3.jpg"];
   RefreshController mRefreshController = new RefreshController();
   ClassicFooter footer = new ClassicFooter();
@@ -40,16 +42,19 @@ class HomeItemPageState extends State<HomeItemPage> {
   bool network = true;
   List<EntryModel> entryModels = new List();
 
+  List<RissComplete> mRissCompleteList;
+
   @override
   void initState() {
     super.initState();
+    mRissCompleteList = List();
     initData();
   }
 
   initData() async {
     network = await MonitorNetworkUtils.isNetwork();
-    print('network:'+network.toString());
-    LoginUser user = LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
+    LoginUser user =
+        LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
     if (network) {
       var baseMap = DataHelper.getBaseMap();
       baseMap.clear();
@@ -84,13 +89,15 @@ class HomeItemPageState extends State<HomeItemPage> {
 //        });
 //        print('newEntryModels:'+newEntryModels[0].toJson().toString());
         StorageUtils.saveModel("menu", itemGrid);
+        initCompleteTask();
         setState(() {});
       }
     } else {
       entryModels.clear();
-      ItemGrid itemGrid = ItemGrid.fromJson(StorageUtils.getModelWithKey("menu"));
+      ItemGrid itemGrid =
+          ItemGrid.fromJson(StorageUtils.getModelWithKey("menu"));
       List<EntryModel> entryModelsTemp = itemGrid.entryModels;
-      for(int i = 0;i<entryModelsTemp.length;i++){
+      for (int i = 0; i < entryModelsTemp.length; i++) {
         if (user.permission.containsKey(entryModelsTemp[i].permission)) {
           entryModels.add(entryModelsTemp[i]);
         }
@@ -200,25 +207,29 @@ class HomeItemPageState extends State<HomeItemPage> {
                   onTap: () {
                     if (entryModels[index]?.dataType != null) {
                       if (entryModels[index]?.dataType == "LIST") {
-                        RouteUtils.pushPage(context, CommListView(entryModels[index]));
+                        RouteUtils.pushPage(
+                            context, CommListView(entryModels[index]));
                       } else if (entryModels[index]?.dataType == "DETAIL") {
                         DetailPageInfo detailPageInfo = DetailPageInfo()
                           ..params = entryModels[index].params
                           ..dataType = entryModels[index].dataType
                           ..detailPageId = entryModels[index].toPage;
-                        RouteUtils.pushPage(context, DetailPage(detailPageInfo));
+                        RouteUtils.pushPage(
+                            context, DetailPage(detailPageInfo));
                       }
-                    } else if(entryModels[index]?.secondLevel != null && entryModels[index].secondLevel){
-                      RouteUtils.pushPage(context, SecondMenu(entryModels[index]));
-                    }else{
+                    } else if (entryModels[index]?.secondLevel != null &&
+                        entryModels[index].secondLevel) {
+                      RouteUtils.pushPage(
+                          context, SecondMenu(entryModels[index]));
+                    } else {
                       //  离线菜单
-                      if(entryModels[index].id=="teak_download"){
+                      if (entryModels[index].id == "teak_download") {
                         RouteUtils.pushPage(context, DownloadPage());
-                      }else if(entryModels[index].id=="task_check"){
+                      } else if (entryModels[index].id == "task_check") {
                         RouteUtils.pushPage(context, TaskListPage());
-                      }else if(entryModels[index].id=="task_upload"){
-                        print('任务上传');
-                      }else if(entryModels[index].id=="task_statistics"){
+                      } else if (entryModels[index].id == "task_upload") {
+                        RouteUtils.pushPage(context, UploadTaskPage());
+                      } else if (entryModels[index].id == "task_statistics") {
                         print('任务统计');
                       }
                     }
@@ -237,14 +248,40 @@ class HomeItemPageState extends State<HomeItemPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: network?Image.network(
-                            "${Address.BaseImageURL + entryModels[index].icon}",
-                            width: 44,
-                            height: 44,
-                            alignment: Alignment.center,
-                          ):
-                          Image.asset("resources/images${entryModels[index].icon.substring(entryModels[index].icon.lastIndexOf("/"))}",
-                              width: 44,height: 44,alignment: Alignment.center)
+                          child: Stack(
+                            children: [
+                              Align(
+                                child: network
+                                    ? Image.network(
+                                  "${Address.BaseImageURL + entryModels[index].icon}",
+                                  width: 44,
+                                  height: 44,
+                                  alignment: Alignment.center,
+                                )
+                                    : Image.asset(
+                                    "resources/images${entryModels[index].icon.substring(entryModels[index].icon.lastIndexOf("/"))}",
+                                    width: 44,
+                                    height: 44,
+                                    alignment: Alignment.center),
+                                alignment: Alignment.topCenter,
+                              ),
+                              if(entryModels[index].id == "task_upload" && mRissCompleteList.length>0)
+                              Align(
+                                alignment: Alignment.topRight,
+                                  child: Container(
+                                    width: 14,
+                                    height: 14,
+//                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                                      border: Border.all(color: Colors.red),
+                                    ),
+                                    child: Container(),
+//                                    Text(mRissCompleteList.length.toString()+"",style: TextStyle(color: Colors.white,fontSize: 12),),
+                                  )),
+                            ],
+                          ),
                         ),
                         Expanded(
                           child: Center(
@@ -339,4 +376,25 @@ class HomeItemPageState extends State<HomeItemPage> {
       ),
     );
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 监听路由
+    RootApp.routeObserver.subscribe(this, ModalRoute.of(context));
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    // 当从其他页面返回当前页面时出发此方法
+    initCompleteTask();
+  }
+
+  initCompleteTask() async{
+    RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
+    mRissCompleteList = await rissCompleteProvider.selectRissByIsUpload("0");
+    setState(() {});
+  }
+
 }

@@ -230,7 +230,7 @@ class DownloadPageState extends State<DownloadPage> {
 
           rissList.forEach((element) {
             RissProvider rissProvider = RissProvider();
-            rissProvider.insertRiss(element);
+            rissProvider.insertRiss(element,false);
           });
 
         });

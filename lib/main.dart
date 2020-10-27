@@ -9,7 +9,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 
-
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await SpUtil.getInstance();
@@ -27,6 +26,7 @@ void main() async{
 }
 
 class RootApp extends StatefulWidget{
+  static final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
   @override
   State<StatefulWidget> createState() {
     return RootAppState();
@@ -35,9 +35,11 @@ class RootApp extends StatefulWidget{
 }
 
 class RootAppState extends State<RootApp> {
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorObservers: [RootApp.routeObserver],
       home: IndexPage(),
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
