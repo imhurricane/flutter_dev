@@ -4,6 +4,7 @@ import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dev/comm/comm_utils.dart';
+import 'package:flutter_dev/comm/monitor_network_utils.dart';
 import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/http/address.dart';
 import 'package:flutter_dev/http/data_helper.dart';
@@ -126,6 +127,7 @@ class DownloadPageState extends State<DownloadPage> {
                 flex: 6,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text(
                       mData[index].description,
@@ -172,25 +174,31 @@ class DownloadPageState extends State<DownloadPage> {
   }
 
   initData() async {
-    LoginUser user =
-        LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
-    var baseMap = DataHelper.getBaseMap();
-    baseMap.clear();
-    baseMap['date'] = DateUtil.formatDate(DateTime.now(), format: "yyyy-MM-dd");
-    baseMap['yhxtm'] = user.yhxtm;
-    baseMap['pageNumber'] = pageInfo.pageNumber;
-    baseMap['pageSize'] = pageInfo.pageSize;
-    ResultData result = await HttpManager.getInstance()
-        .get(Address.DownloadTaskList_URL, baseMap);
-    if (result.code != 200) {
-      CommUtils.showDialog(context, "提示", result.data, false, okOnPress: () {});
-    } else {
-      List<dynamic> json = jsonDecode(result.data);
-      json.forEach((element) {
-        mData.add(Task.fromJson(element));
-      });
+    int networkStatus = await MonitorNetworkUtils.getNetworkStatus();
+    if(networkStatus==0){
+      CommUtils.showDialog(context, "提示", "请连接网络后再试", false, okOnPress: () {});
+    }else{
+      LoginUser user =
+      LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
+      var baseMap = DataHelper.getBaseMap();
+      baseMap.clear();
+      baseMap['date'] = DateUtil.formatDate(DateTime.now(), format: "yyyy-MM-dd");
+      baseMap['yhxtm'] = user.yhxtm;
+      baseMap['pageNumber'] = pageInfo.pageNumber;
+      baseMap['pageSize'] = pageInfo.pageSize;
+      ResultData result = await HttpManager.getInstance()
+          .get(Address.DownloadTaskList_URL, baseMap);
+      if (result.code != 200) {
+        CommUtils.showDialog(context, "提示", result.data, false, okOnPress: () {});
+      } else {
+        List<dynamic> json = jsonDecode(result.data);
+        json.forEach((element) {
+          mData.add(Task.fromJson(element));
+        });
+      }
+      setState(() {});
     }
-    setState(() {});
+
   }
 
   onDownloadTask(String taskXtm) async {
@@ -199,7 +207,9 @@ class DownloadPageState extends State<DownloadPage> {
     baseMap['taskXtm'] = taskXtm;
     ResultData result =
         await HttpManager.getInstance().get(Address.DownloadTask_URL, baseMap);
+    print('');
     if (result.code != 200) {
+      Navigator.of(context).pop();
       CommUtils.showDialog(context, "提示", result.data, false, okOnPress: () {});
     } else {
       Map<String, dynamic> json = jsonDecode(result.data);

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
@@ -38,6 +39,7 @@ class CommListViewState extends State<CommListView> {
   PageInfo pageInfo = PageInfo();
   DetailPageInfo detailPageInfo;
   List<ListViewItem> viewItems;
+  String pageTitle = "";
 
   @override
   void initState() {
@@ -57,9 +59,10 @@ class CommListViewState extends State<CommListView> {
           return [
             SliverAppBar(
               pinned: true,
-              title: Text(viewItems.length>0?viewItems[0].listTitle:""),
+              title: Text(pageTitle,style: TextStyle(fontSize: 20,),),
               centerTitle: true,
               leading: IconButton(
+                alignment: Alignment.center,
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -67,6 +70,7 @@ class CommListViewState extends State<CommListView> {
               ),
               actions: [
                 IconButton(
+                  alignment: Alignment.center,
 //                  padding: EdgeInsets.only(right: 20),
                   icon: Icon(
                     Icons.menu,
@@ -151,37 +155,42 @@ class CommListViewState extends State<CommListView> {
               minHeight: 60,
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Column(
-                  children:[
-                    Container(
-                      height: 40,
-                      width: 6,
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8)),
-                      ),
-                    ),
-                  ],
-                ),
+//                Column(
+//                  children:[
+//                    Container(
+//                      height: 40,
+//                      width: 6,
+//                      decoration: BoxDecoration(
+//                        color: Colors.blueAccent,
+//                        borderRadius: BorderRadius.only(
+//                            topLeft: Radius.circular(8)),
+//                      ),
+//                    ),
+//                  ],
+//                ),
                 Expanded(
                   flex: 8,
                   child: Padding(
-                    padding: const EdgeInsets.all(4.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Html(
-                          style: {"body":Style(alignment: Alignment.center,fontSize: FontSize.percent(130),color: Colors.black,fontWeight: FontWeight.w400)},
+                          style: {"body":Style(margin: EdgeInsets.all(0.0),
+                              fontSize: FontSize(18),color: Colors.black,fontWeight: FontWeight.w400)},
                           data: viewItems[index].itemListViewContent.title==null?"":viewItems[index].itemListViewContent.title,
                         ),
                         Offstage(
                           offstage: viewItems[index].itemListViewContent.describe!=null?false:true,
                           child: Html(
-                            style: {"body" : Style(fontSize: FontSize.percent(116),color:Colors.grey[800],),},
+                            style: {"body" : Style(margin: EdgeInsets.only(top:4.0),
+                              fontSize: FontSize(16),color:Colors.grey[800],),},
                             data: viewItems[index].itemListViewContent.describe==null?"":viewItems[index].itemListViewContent.describe,
                           ),
                         ),
@@ -189,8 +198,8 @@ class CommListViewState extends State<CommListView> {
                           offstage: viewItems[index].itemListViewContent.note!=null?false:true,
                           child: Html(
                             style:{
-                              "body" : Style(
-                                  fontSize: FontSize.percent(110),color: Colors.grey[400]
+                              "body" : Style(margin: EdgeInsets.only(top:4.0),
+                                  fontSize: FontSize(14),color: Colors.grey[500]
                               ),
                             },
                             data: viewItems[index].itemListViewContent.note==null?"":viewItems[index].itemListViewContent.note,
@@ -200,18 +209,22 @@ class CommListViewState extends State<CommListView> {
                     ),
                   ),
                 ),
-                Offstage(
-                  offstage: viewItems[index].itemListViewContent.subTitle!=null?false:true,
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: 110,
-                    ),
-                    child: Html(
-                      data: viewItems[index].itemListViewContent.subTitle==null?"":viewItems[index].itemListViewContent.subTitle,
-                      style:{
-                        "body":Style(
-                            fontSize: FontSize.percent(130),color: Colors.blueAccent),
-                      },
+                Expanded(
+                  flex: 3,
+                  child: Offstage(
+                    offstage: viewItems[index].itemListViewContent.subTitle!=null?false:true,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Html(
+                          data: viewItems[index].itemListViewContent.subTitle==null?"":viewItems[index].itemListViewContent.subTitle,
+                          style:{
+                            "body":Style(margin: EdgeInsets.all(0.0),textAlign: TextAlign.end,
+                                fontSize: FontSize(18),color: Colors.blueAccent),
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -230,7 +243,6 @@ class CommListViewState extends State<CommListView> {
     });
     await initPageData();
     mRefreshController.loadComplete();
-    mRefreshController.loadNoData();
   }
 
   onRefresh() async {
@@ -247,8 +259,6 @@ class CommListViewState extends State<CommListView> {
   }
 
   initPageData() async {
-    viewItems.clear();
-    print("----------------------");
     var baseMap = DataHelper.getBaseMap();
     baseMap.clear();///8aUUVC4cbmHyy6+2yB+/2A==
     Map<String, dynamic> user = StorageUtils.getModelWithKey("userInfo");
@@ -268,24 +278,27 @@ class CommListViewState extends State<CommListView> {
 
       ResultData result = await HttpManager.getInstance().get(Address.MenuItemUrl, baseMap);
       if(result.code == 200){
-        setState(() {
-          List json = jsonDecode(result.data);
-          json.forEach((element) {
-            viewItems.add(ListViewItem.fromJson(element));
-          });
+        List json = jsonDecode(result.data);
+        if(json.length==0){
+          mRefreshController.loadNoData();
+        }else{
+          pageTitle = ListViewItem.fromJson(json[0]).listTitle;
+          if(pageInfo.pageNumber==1){
+            viewItems.clear();
+          }
+        }
+        json.forEach((element) {
+          viewItems.add(ListViewItem.fromJson(element));
         });
       }else{
-        setState(() {
-
-        });
         CommUtils.showDialog(context, "提示", "${result.data}", false,
             okOnPress: () {});
       }
     }else{
 //      CommUtils.showDialog(context, "提示", "登录信息过期,请重新登录", false,
 //          okOnPress: () {});
-
     }
+    setState(() {});
   }
   @override
   void dispose() {

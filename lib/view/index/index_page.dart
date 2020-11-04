@@ -114,7 +114,7 @@ class IndexPageState extends State<IndexPage> {
                   width: 15,
                 ),
                 Text(
-                  "Flutter欢饮您",
+                  "安全生产创文明",
                 )
               ],
             ),

@@ -59,7 +59,7 @@ class FormInputCell extends StatefulWidget {
     this.text: '',
     this.textWidget,
     this.keyboardType: TextInputType.text,
-    this.hintText: '请输入',
+    this.hintText: '',
     this.focusNode,
     this.showRedStar:false,
     this.leftWidget,
@@ -103,7 +103,7 @@ class _FormInputCellState extends State<FormInputCell> {
                   minWidth: double.infinity, //宽度尽可能大
                   minHeight: _cellHeight //最小高度为50像素
               ),
-              padding:  EdgeInsets.fromLTRB(5, 0, 10, 0),
+              padding:  const EdgeInsets.fromLTRB(4, 0, 8, 0),
 //        decoration: BoxDecoration(
 //            border: widget.hiddenLine== true ?null: Border(bottom: Divider.createBorderSide(context, width: 0.8),)
 //        ),

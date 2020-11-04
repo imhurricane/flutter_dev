@@ -65,6 +65,7 @@ class HomeItemPageState extends State<HomeItemPage> with RouteAware{
       if (result.code != 200) {
         CommUtils.showDialog(context, "提示", result.data, false,
             okOnPress: () {});
+        initOfflineMenu(user);
       } else {
         Map<String, dynamic> json = jsonDecode(result.data);
 
@@ -93,23 +94,27 @@ class HomeItemPageState extends State<HomeItemPage> with RouteAware{
         setState(() {});
       }
     } else {
-      entryModels.clear();
-      ItemGrid itemGrid =
-          ItemGrid.fromJson(StorageUtils.getModelWithKey("menu"));
-      List<EntryModel> entryModelsTemp = itemGrid.entryModels;
-      for (int i = 0; i < entryModelsTemp.length; i++) {
-        if (user.permission.containsKey(entryModelsTemp[i].permission)) {
-          entryModels.add(entryModelsTemp[i]);
-        }
-      }
-      Map<String, String> gridItem = Map();
-      List<Map<String, String>> gridItems = new List<Map<String, String>>();
-      gridItems.add(gridItem);
-      ItemHome itemHome = ItemHome.grid(ViewType.gridView, gridItems);
-      itemHomes.clear();
-      itemHomes.add(itemHome);
-      setState(() {});
+      initOfflineMenu(user);
     }
+  }
+
+  initOfflineMenu(LoginUser user){
+    entryModels.clear();
+    ItemGrid itemGrid =
+    ItemGrid.fromJson(StorageUtils.getModelWithKey("menu"));
+    List<EntryModel> entryModelsTemp = itemGrid.entryModels;
+    for (int i = 0; i < entryModelsTemp.length; i++) {
+      if (user.permission.containsKey(entryModelsTemp[i].permission)) {
+        entryModels.add(entryModelsTemp[i]);
+      }
+    }
+    Map<String, String> gridItem = Map();
+    List<Map<String, String>> gridItems = new List<Map<String, String>>();
+    gridItems.add(gridItem);
+    ItemHome itemHome = ItemHome.grid(ViewType.gridView, gridItems);
+    itemHomes.clear();
+    itemHomes.add(itemHome);
+    setState(() {});
   }
 
   @override
@@ -248,6 +253,7 @@ class HomeItemPageState extends State<HomeItemPage> with RouteAware{
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
+                          flex: 2,
                           child: Stack(
                             children: [
                               Align(
@@ -262,7 +268,8 @@ class HomeItemPageState extends State<HomeItemPage> with RouteAware{
                                     "resources/images${entryModels[index].icon.substring(entryModels[index].icon.lastIndexOf("/"))}",
                                     width: 44,
                                     height: 44,
-                                    alignment: Alignment.center),
+                                    alignment: Alignment.center,
+                                ),
                                 alignment: Alignment.topCenter,
                               ),
                               if(entryModels[index].id == "task_upload" && mRissCompleteList.length>0)
@@ -284,13 +291,12 @@ class HomeItemPageState extends State<HomeItemPage> with RouteAware{
                           ),
                         ),
                         Expanded(
-                          child: Center(
-                            child: Text(
-                              "${entryModels[index].title}",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          flex: 1,
+                          child: Text(
+                            "${entryModels[index].title}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),

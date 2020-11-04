@@ -465,7 +465,6 @@ class LoginPageState extends State<LoginPage>
       animationController.reverse();
     }else {
       result = await HttpManager.getInstance().get(Address.LOGIN_URL, baseMap);
-
       if (result.code == 200) {
         Map<String, dynamic> json = jsonDecode(result.data);
         LoginUser loginUser = LoginUser.fromJson(json);

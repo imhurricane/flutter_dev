@@ -5,13 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
 
 class PictureShow extends StatelessWidget {
-  final List<LocalMedia> imageUrl;
+  final List<LocalMedia> image;
   final int columnSize;
-  final bool isLocal;
 
   PictureShow({
-    @required this.imageUrl,
-    this.isLocal = false,
+    @required this.image,
     this.columnSize = 3,
   });
 
@@ -23,7 +21,7 @@ class PictureShow extends StatelessWidget {
         shrinkWrap: true,
         crossAxisCount: columnSize,
         children: List.generate(
-          imageUrl != null ? imageUrl.length : 1,
+          image != null ? image.length : 1,
           (index) => GestureDetector(
             child: Padding(
               padding: const EdgeInsets.all(0.5),
@@ -31,7 +29,7 @@ class PictureShow extends StatelessWidget {
             ),
             onTap: () {
               Navigator.of(context).push(
-                NinePicture(isLocal, imageUrl, index),
+                NinePicture(image[index].isLocal, image, index),
               );
             },
           ),
@@ -40,17 +38,16 @@ class PictureShow extends StatelessWidget {
     );
   }
 
-  Future checkPictureISLocal(int index) async{
-    File txt = File(imageUrl[index].realPath);
+  Future<bool> checkPictureISLocal(int index) async {
+    File txt = File(image[index].realPath);
     return await txt.exists(); //返回真假
   }
 
   //
-   buildImage(int index){
-
-    if (imageUrl[index].mimeType!="") {
+  buildImage(int index) {
+    if (image[index].isLocal) {
       return Image.asset(
-        imageUrl[index].realPath,
+        image[index].path,
         fit: BoxFit.cover,
         key: Key(index.toString()),
       );
@@ -63,7 +60,9 @@ class PictureShow extends StatelessWidget {
 //                   backgroundColor: Colors.pink,
             ),
         errorWidget: (context, url, error) => Icon(Icons.error),
-        imageUrl: imageUrl != null ? imageUrl[index].realPath==null?"":imageUrl[index].realPath : "12321",
+        imageUrl: image != null
+            ? image[index].realPath == null ? "" : image[index].realPath
+            : "12321",
       );
     }
   }
@@ -206,15 +205,15 @@ class _PictureWidgetState extends State<_PictureWidget> {
   }
 
   _buildImage(int index) {
-    if (widget.picList[index].mimeType!="") {
+    if (isLocal) {
       return Image.asset(
-        widget.picList[index].realPath,
+        widget.picList[index].path,
         fit: BoxFit.cover,
         key: Key(index.toString()),
       );
     } else {
       return CachedNetworkImage(
-        imageUrl: widget.picList[index].path,
+        imageUrl: widget.picList[index].realPath,
         fit: BoxFit.cover,
       );
     }

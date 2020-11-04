@@ -117,6 +117,9 @@ ResultData resultError(DioError e) {
       e.type == DioErrorType.RECEIVE_TIMEOUT) {
     errorResponse.statusCode = Code.NETWORK_TIMEOUT;
     errorResponse.statusMessage = "网络连接超时";
+  }else{
+    errorResponse.statusCode = Code.NETWORK_TIMEOUT;
+    errorResponse.statusMessage = "网络连接失败";
   }
   return new ResultData(
       errorResponse.statusMessage, false, errorResponse.statusCode);

@@ -47,7 +47,7 @@ class SecondMenuState extends State<SecondMenu> {
 
    return Scaffold(
      appBar: AppBar(
-       title: Text(widget.entryModel.title),
+       title: Text(widget.entryModel.title,style: TextStyle(fontSize: 20),),
        centerTitle: true,
        leading: IconButton(
          onPressed: () {
@@ -139,10 +139,12 @@ class SecondMenuState extends State<SecondMenu> {
                           Expanded(
                             child: Center(
                               child: Text(
-                                entryModels[index].title.length>5?entryModels[index].title.substring(0,4)+"···":entryModels[index].title,
+                                entryModels[index].title.length>5?(entryModels[index].title.substring(0,4)+"··"):entryModels[index].title,
                                 maxLines: 1,
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 16,
+                                  color: Colors.black,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),

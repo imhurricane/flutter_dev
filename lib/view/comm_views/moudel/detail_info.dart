@@ -232,17 +232,20 @@ class LocalMedia {
   String mimeType;
   String realPath;
   String path;
+  bool isLocal;
 
   LocalMedia({
     this.mimeType,
     this.realPath,
     this.path,
+    this.isLocal,
   });
 
   LocalMedia.fromJson(Map<String, dynamic> json) {
     mimeType = json['mimeType'];
     realPath = json['realPath'];
     path = json['path'];
+    isLocal = json['isLocal'];
   }
 
   Map<String, dynamic> toJson() {
@@ -250,6 +253,7 @@ class LocalMedia {
     data['mimeType'] = this.mimeType;
     data['realPath'] = this.realPath;
     data['path'] = this.path;
+    data['isLocal'] = this.isLocal;
     return data;
   }
 }

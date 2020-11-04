@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomeItemPageSort extends StatefulWidget {
-  num pageIndex;
-  String pageTitle;
+  final num pageIndex;
+  final String pageTitle;
 
   HomeItemPageSort(this.pageIndex, this.pageTitle);
 

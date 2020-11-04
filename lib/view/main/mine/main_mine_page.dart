@@ -118,15 +118,6 @@ class MainMinePageState extends State<MainMinePage> {
     );
   }
 
-  ///申请权限
-  Future<void> requestPermission(Permission permission) async {
-    final status = await permission.request();
-
-    setState(() {
-      print(status);
-    });
-  }
-
   //  退出登录操作
   loginOut(int index) {
     CommUtils.showDialog(context, "提示", "确认退出APP吗?", true, okOnPress: () {

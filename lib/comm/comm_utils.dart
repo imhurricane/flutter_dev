@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/moudel/user_bean.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CommUtils {
   static showDialog(
@@ -15,7 +16,7 @@ class CommUtils {
         headerAnimationLoop: false,
         dialogType: DialogType.NO_HEADER,
         animType: AnimType.BOTTOMSLIDE,
-        title: '提示',
+        title: title!=null?title:"",
         desc: '$msg',
         btnOkColor: Colors.lightBlue,
         btnCancelColor: Colors.red,
@@ -31,7 +32,7 @@ class CommUtils {
         headerAnimationLoop: false,
         dialogType: DialogType.NO_HEADER,
         animType: AnimType.BOTTOMSLIDE,
-        title: '提示',
+        title: title!=null?title:"",
         desc: '$msg',
         btnOkOnPress: okOnPress,
         btnOkText: "确定",
@@ -44,6 +45,11 @@ class CommUtils {
   /// 获取用户信息
   static LoginUser getUserInfo(){
     return LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
+  }
+
+  ///申请权限
+  Future requestPermission(Permission permission) async {
+    return await permission.request();
   }
 
 }

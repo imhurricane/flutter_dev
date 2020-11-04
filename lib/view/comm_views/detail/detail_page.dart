@@ -44,18 +44,18 @@ class DetailPageState extends State<DetailPage>{
   RefreshController mRefreshController = new RefreshController();
   DetailData detailData;
   final double titleContentSpaces = 10;
-  final double titleSpaces = 90;
+  final double titleSpaces = 106;
   final Alignment titlePosition = Alignment.centerRight;
   final controller = TextEditingController();
 
   final TextStyle titleStyle = TextStyle(
     color: Colors.black,
-    fontSize: 18,
-    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    fontWeight: FontWeight.w100,
   );
   final TextStyle contentStyle = TextStyle(
     color: Colors.black,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: FontWeight.w400,
   );
   ///  点击非textField关闭键盘
@@ -88,63 +88,75 @@ class DetailPageState extends State<DetailPage>{
   Widget build(BuildContext context) {
     return Material(
       child: Scaffold(
-        body: NestedScrollView(
-          controller: scrollController,
-          headerSliverBuilder: (BuildContext listContext, bool flag) {
-            return [
-              SliverAppBar(
-                pinned: true,
-                title: Text(detailData.itemDetailColumns == null ? ""
-                    : detailData.itemDetailColumns[0].pageTitle),
-                centerTitle: true,
-                leading: IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: Icon(Icons.arrow_back_ios),
-                ),
-                actions: [
-                  IconButton(
-                    onPressed: () async {
-                      final result = await showMenu(
-                        color: Colors.grey[700],
-                          context: context,
-                          position: RelativeRect.fromLTRB(4000.0, 90.0, 0.0, 100.0),
-                          items: buildTopRightButton()
-                          );
-                      dynamic imagePath = await CommBottomAction.action(context,int.parse(result==null?"0":result));
-                      if(null != imagePath){
-                        LocalMedia localMedia = LocalMedia();
-                        localMedia.realPath=imagePath;
-                        localMedia.mimeType=imagePath;
-                        setState(() {
-                          images.add(localMedia);
-                        });
-                        uploadPicture(imagePath);
-                      }
+        body: Container(
+          child: NestedScrollView(
+            controller: scrollController,
+            headerSliverBuilder: (BuildContext listContext, bool flag) {
+              return [
+                SliverAppBar(
+                  pinned: true,
+                  title: Text(detailData.itemDetailColumns == null ? ""
+                      : detailData.itemDetailColumns[0].pageTitle,style: TextStyle(fontSize: 20),),
+                  centerTitle: true,
+                  leading: IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
                     },
-                    icon: Icon(Icons.menu),
+                    icon: Icon(Icons.arrow_back_ios),
                   ),
-                ],
-              ),
-            ];
-          },
-          body: Container(
-            color: Colors.white,
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: SmartRefresher(
-              enablePullDown: true,
-              enablePullUp: false,
-              header: WaterDropHeader(
-                waterDropColor: Colors.blue,
-              ),
-              footer: ClassicFooter(),
-              controller: mRefreshController,
-              onRefresh: onRefresh,
-              onLoading: onLoading,
-              child: buildBody(),
-            )),
+                  actions: [
+                    IconButton(
+                      onPressed: () async {
+                        CommBottomAction.result = "";
+                        final result = await showMenu(
+                          color: Colors.grey[700],
+                            context: context,
+                            position: RelativeRect.fromLTRB(4000.0, 90.0, 0.0, 100.0),
+                            items: buildTopRightButton()
+                            );
+                        if(null != result){
+                          String imagePath = await CommBottomAction.action(context,int.parse(result));
+                          if(null != imagePath && imagePath.length>0){
+                            LocalMedia localMedia = LocalMedia();
+                            localMedia.realPath=imagePath;
+                            localMedia.path=imagePath;
+                            localMedia.isLocal=true;
+                            setState(() {
+                              images.add(localMedia);
+                            });
+                            uploadPicture(imagePath);
+                          }
+                        }
 
+                      },
+                      icon: Icon(Icons.menu),
+                    ),
+                  ],
+                ),
+              ];
+            },
+            body: GestureDetector(
+              onTap: (){
+                FocusScope.of(context).requestFocus(blankNode);
+              },
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: SmartRefresher(
+                  enablePullDown: true,
+                  enablePullUp: false,
+                  header: WaterDropHeader(
+                    waterDropColor: Colors.blue,
+                  ),
+                  footer: ClassicFooter(),
+                  controller: mRefreshController,
+                  onRefresh: onRefresh,
+                  onLoading: onLoading,
+                  child: buildBody(),
+                )),
+            ),
+
+          ),
         ),
         bottomNavigationBar: Row(
           mainAxisSize: MainAxisSize.max,
@@ -226,7 +238,7 @@ class DetailPageState extends State<DetailPage>{
     params['suggetstxtm']="";
     params['time']=DateUtil.formatDate(DateTime.now());
 
-    HttpManager.getInstance().uploadPicture(Address.DetailPageIconUrl, params , imagePath);
+    await HttpManager.getInstance().uploadPicture(Address.DetailPageIconUrl, params , imagePath);
   }
 
   buildBody() {
@@ -262,9 +274,8 @@ class DetailPageState extends State<DetailPage>{
      },
      child: images.length>0?Container(
         child: PictureShow(
-          imageUrl: images==null?"":images,
+          image: images==null?"":images,
           columnSize:3,
-          isLocal: true,
         ),
       ):Container(),
    );
@@ -452,11 +463,13 @@ class DetailPageState extends State<DetailPage>{
           buttons.add(FloatButton(
             value: itemDetailButtons.itemDetailButtonBottom[i].description,
             onPressed: () async{
-              dynamic imagePath = await CommBottomAction.action(context,itemDetailButtons.itemDetailButtonBottom[i].buttonType);
-              if(null != imagePath){
+              CommBottomAction.result = "";
+              String imagePath = await CommBottomAction.action(context,itemDetailButtons.itemDetailButtonBottom[i].buttonType);
+              if(null != imagePath && imagePath.length>0){
                 LocalMedia localMedia = LocalMedia();
                 localMedia.realPath=imagePath;
-                localMedia.mimeType=imagePath;
+                localMedia.path=imagePath;
+                localMedia.isLocal=true;
                 setState(() {
                   images.add(localMedia);
                 });
@@ -481,8 +494,8 @@ class DetailPageState extends State<DetailPage>{
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add_circle,size: 20,color: Colors.white,),
-                SizedBox(width: 4.0,),
+//                Icon(Icons.add_circle,size: 20,color: Colors.white,),
+//                SizedBox(width: 4.0,),
                 Text(buttonTopRight[i].description,style: TextStyle(fontSize:18,color: Colors.white),),
               ],
             )));

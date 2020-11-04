@@ -67,9 +67,10 @@ class _FromSpinnerSearchState extends State<FromSpinnerSearch> {
                 popupBackgroundColor: Colors.white,
 //        isFilteredOnline: true,
                 showClearButton: false,
-                showSearchBox: true,
-                enabled: true,//只读
+//                showSearchBox: true,
 
+                enabled: true,//只读
+//                autoFocusSearchBox: false,//默认打开键盘
                 showDropDownButton: false,
                 dropdownBuilderSupportsNullItem: true,
                 dropdownSearchDecoration: InputDecoration(

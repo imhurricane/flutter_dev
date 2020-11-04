@@ -1,12 +1,8 @@
-import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dev/comm/comm_utils.dart';
 import 'package:flutter_dev/comm/storage_utils.dart';
-import 'package:flutter_dev/moudel/user_bean.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/login/login_page.dart';
-import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:flutter_dev/view/main/root/main_page.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 
