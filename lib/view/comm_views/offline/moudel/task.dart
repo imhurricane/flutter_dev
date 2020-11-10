@@ -83,7 +83,7 @@ class TaskProvider extends BaseDbProvider{
   //查询数据库所有
   Future<List<Map<String, dynamic>>> selectMapList() async {
     var db = await getDataBase();
-    var result = await db.query(name);
+    var result = await db.query(name,orderBy: "taskdate desc");
     return result;
   }
 

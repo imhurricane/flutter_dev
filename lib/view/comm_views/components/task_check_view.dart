@@ -11,10 +11,16 @@ class TaskCheck extends StatefulWidget {
 
   final _CheckedCallBack checkedCallBack;
   final Riss riss;
+  final double top;
+  final double left;
+  final double right;
 
   const TaskCheck({
     this.riss,
     this.checkedCallBack,
+    this.top,
+    this.left,
+    this.right,
   });
 
   @override
@@ -32,7 +38,7 @@ class _TaskCheckState extends State<TaskCheck> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 10,left: 36,right: 36),
+      margin: EdgeInsets.only(top: widget.top,left: widget.left,right: widget.right),
       padding: EdgeInsets.all(0.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,10 +48,7 @@ class _TaskCheckState extends State<TaskCheck> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                flex: 2,
-                child: Text("内容："),
-              ),
+              Text("内容："),
               Expanded(
                 flex: 8,
                 child: Column(
@@ -60,7 +63,7 @@ class _TaskCheckState extends State<TaskCheck> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(flex:2,child: Text("标准：")),
+              Text("标准："),
               Expanded(
                 flex: 8,
                 child: Column(

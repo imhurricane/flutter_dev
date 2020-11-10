@@ -13,7 +13,8 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-
+#  camera: ^0.5.6+3
+#  path: "com.comm.flutter_dev/files/Pictures/"
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.3
@@ -53,6 +54,8 @@ dependencies:
   encrypt: ^4.0.2
   # 底部弹出 日期选择器 单列多列  https://pub.dev/packages/flutter_picker
   flutter_picker: 1.1.0
+  multi_image_picker: ^4.6.1
+  flutter_image_compress: ^0.7.0
   # 时间格式转换 https://pub.dev/packages/date_format
   date_format: 1.0.8
   #日历

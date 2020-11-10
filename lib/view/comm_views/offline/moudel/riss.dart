@@ -13,6 +13,7 @@ class Riss {
   String inactivemesure;
   String activemesure;
   String havemesure;
+  String imgPath;
 
   Riss(
       {this.xtm,
@@ -24,7 +25,9 @@ class Riss {
         this.fxffcs,
         this.inactivemesure,
         this.activemesure,
-        this.havemesure});
+        this.havemesure,
+        this.imgPath,
+      });
 
   Riss.fromJson(Map<String, dynamic> json) {
     xtm = json['xtm'];
@@ -37,6 +40,7 @@ class Riss {
     inactivemesure = json['inactivemesure'];
     activemesure = json['activemesure'];
     havemesure = json['havemesure'];
+    imgPath = json['imgPath'];
   }
 
   Map<String, dynamic> toJson() {
@@ -51,6 +55,7 @@ class Riss {
     data['inactivemesure'] = this.inactivemesure;
     data['activemesure'] = this.activemesure;
     data['havemesure'] = this.havemesure;
+    data['imgPath'] = this.imgPath;
     return data;
   }
 }
@@ -70,6 +75,7 @@ class RissProvider extends BaseDbProvider{
   final String columnInactivemesure = "inactivemesure";
   final String columnActivemesure = "activemesure";
   final String columnHavemesure = "havemesure";
+  final String columnImgPath = "imgPath";
 
   @override
   tableName() {
@@ -89,6 +95,7 @@ class RissProvider extends BaseDbProvider{
         $columnFxffcs text not null,
         $columnInactivemesure text not null,
         $columnActivemesure text not null,
+        $columnImgPath text,
         $columnHavemesure text not null)
       ''';
   }
@@ -147,6 +154,7 @@ class RissProvider extends BaseDbProvider{
         "$columnParentxtm = ?,"
         "$columnPjjb = ?,"
         "$columnRiskfactors = ?,"
+        "$columnImgPath = ?,"
         "$columnFxffcs = ?";
     List list = new List();
     list.add(riss.xtm);
@@ -155,6 +163,7 @@ class RissProvider extends BaseDbProvider{
     list.add(riss.parentxtm);
     list.add(riss.pjjb);
     list.add(riss.riskfactors);
+    list.add(riss.imgPath);
     list.add(riss.fxffcs);
 
     if(isUpdateCom){

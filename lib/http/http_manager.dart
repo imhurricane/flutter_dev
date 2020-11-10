@@ -19,7 +19,7 @@ class HttpManager {
   HttpManager._internal({String baseUrl}) {
     if (null == _dio) {
       _dio = new Dio(
-          new BaseOptions(baseUrl: Address.BASE_URL, connectTimeout: 20000));
+          new BaseOptions(baseUrl: Address.BASE_URL, connectTimeout: 50000,receiveTimeout: 300000,sendTimeout: 300000));
       _dio.interceptors.add(new LogsInterceptors());
       _dio.interceptors.add(new ResponseInterceptors());
     }
@@ -116,10 +116,10 @@ ResultData resultError(DioError e) {
   if (e.type == DioErrorType.CONNECT_TIMEOUT ||
       e.type == DioErrorType.RECEIVE_TIMEOUT) {
     errorResponse.statusCode = Code.NETWORK_TIMEOUT;
-    errorResponse.statusMessage = "网络连接超时";
+    errorResponse.statusMessage = "网络连接超时"+"\n"+Address.BASE_URL;
   }else{
     errorResponse.statusCode = Code.NETWORK_TIMEOUT;
-    errorResponse.statusMessage = "网络连接失败";
+    errorResponse.statusMessage = "网络连接失败"+"\n"+Address.BASE_URL;
   }
   return new ResultData(
       errorResponse.statusMessage, false, errorResponse.statusCode);

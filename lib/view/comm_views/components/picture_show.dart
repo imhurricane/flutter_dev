@@ -7,17 +7,22 @@ import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
 class PictureShow extends StatelessWidget {
   final List<LocalMedia> image;
   final int columnSize;
-
+  final FocusNode blankNode = FocusNode();
   PictureShow({
     @required this.image,
     this.columnSize = 3,
   });
 
   Widget build(BuildContext context) {
-    return Container(
+    return MediaQuery.removePadding(
+      context:context,
+      removeTop: true,
+      removeRight: true,
+      removeLeft: true,
+      removeBottom: true,
 //      padding: EdgeInsets.only(left: 10.0,right: 10.0),
       child: GridView.count(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         crossAxisCount: columnSize,
         children: List.generate(
@@ -28,8 +33,9 @@ class PictureShow extends StatelessWidget {
               child: buildImage(index),
             ),
             onTap: () {
+              FocusScope.of(context).requestFocus(blankNode);
               Navigator.of(context).push(
-                NinePicture(image[index].isLocal, image, index),
+                NinePicture(image[index].loadPictureType, image, index),
               );
             },
           ),
@@ -45,13 +51,13 @@ class PictureShow extends StatelessWidget {
 
   //
   buildImage(int index) {
-    if (image[index].isLocal) {
+    if (image[index].loadPictureType==LoadPictureType.asset) {
       return Image.asset(
         image[index].path,
         fit: BoxFit.cover,
         key: Key(index.toString()),
       );
-    } else {
+    } else if(image[index].loadPictureType==LoadPictureType.netWork){
       return CachedNetworkImage(
         key: Key(index.toString()),
         fit: BoxFit.cover,
@@ -64,6 +70,12 @@ class PictureShow extends StatelessWidget {
             ? image[index].realPath == null ? "" : image[index].realPath
             : "12321",
       );
+    }else{
+      return Image.file(
+        File(image[index].path),
+        fit: BoxFit.cover,
+        alignment: Alignment.center,
+      );
     }
   }
 }
@@ -72,11 +84,11 @@ class NinePicture<T> extends PopupRoute<T> {
   final String barrierLabel;
   final List picList;
   final int index;
-  final bool isLocal;
+  final LoadPictureType loadPictureType;
   int startX;
   int endX;
 
-  NinePicture(this.isLocal, this.picList, this.index, {this.barrierLabel});
+  NinePicture(this.loadPictureType, this.picList, this.index, {this.barrierLabel});
 
   @override
   Duration get transitionDuration => Duration(milliseconds: 2000);
@@ -111,7 +123,7 @@ class NinePicture<T> extends PopupRoute<T> {
             onTap: () {
               Navigator.pop(context);
             },
-            child: _PictureWidget(picList, index, isLocal),
+            child: _PictureWidget(picList, index, loadPictureType),
           ),
         ),
       ),
@@ -122,9 +134,9 @@ class NinePicture<T> extends PopupRoute<T> {
 class _PictureWidget extends StatefulWidget {
   final List<LocalMedia> picList;
   final int index;
-  final isLocal;
+  final loadPictureType;
 
-  _PictureWidget(this.picList, this.index, this.isLocal);
+  _PictureWidget(this.picList, this.index, this.loadPictureType);
 
   @override
   State createState() {
@@ -136,13 +148,13 @@ class _PictureWidgetState extends State<_PictureWidget> {
   int startX = 0;
   int endX = 0;
   int index = 0;
-  bool isLocal;
+  LoadPictureType loadPictureType;
 
   @override
   void initState() {
     super.initState();
     index = widget.index;
-    isLocal = widget.isLocal;
+    loadPictureType = widget.loadPictureType;
   }
 
   @override
@@ -156,7 +168,7 @@ class _PictureWidgetState extends State<_PictureWidget> {
           children: <Widget>[
             GestureDetector(
               child: Center(
-                child: _buildImage(index),
+                child: _buildImage(index,loadPictureType),
               ),
               onHorizontalDragDown: (detail) {
                 startX = detail.globalPosition.dx.toInt();
@@ -204,18 +216,20 @@ class _PictureWidgetState extends State<_PictureWidget> {
     );
   }
 
-  _buildImage(int index) {
-    if (isLocal) {
+  _buildImage(int index,LoadPictureType loadPictureType) {
+    if (loadPictureType == LoadPictureType.asset) {
       return Image.asset(
         widget.picList[index].path,
         fit: BoxFit.cover,
         key: Key(index.toString()),
       );
-    } else {
+    } else if(loadPictureType == LoadPictureType.netWork){
       return CachedNetworkImage(
         imageUrl: widget.picList[index].realPath,
         fit: BoxFit.cover,
       );
+    }else{
+      return Image.file(File(widget.picList[index].path),fit: BoxFit.cover,);
     }
   }
 

@@ -120,7 +120,7 @@ class DetailPageState extends State<DetailPage>{
                             LocalMedia localMedia = LocalMedia();
                             localMedia.realPath=imagePath;
                             localMedia.path=imagePath;
-                            localMedia.isLocal=true;
+                            localMedia.loadPictureType=LoadPictureType.file;
                             setState(() {
                               images.add(localMedia);
                             });
@@ -469,7 +469,7 @@ class DetailPageState extends State<DetailPage>{
                 LocalMedia localMedia = LocalMedia();
                 localMedia.realPath=imagePath;
                 localMedia.path=imagePath;
-                localMedia.isLocal=true;
+                localMedia.loadPictureType=LoadPictureType.file;
                 setState(() {
                   images.add(localMedia);
                 });

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dev/comm/comm_utils.dart';
 import 'package:flutter_dev/comm/storage_utils.dart';
+import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/spinner.dart';
 import 'package:flutter_dev/view/comm_views/components/task_check_view.dart';
 import 'package:flutter_dev/view/comm_views/moudel/selects.dart';
@@ -11,6 +12,8 @@ import 'package:flutter_dev/view/comm_views/offline/moudel/paper.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss_complete.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/task.dart';
+
+import 'abnormal_phenomena.dart';
 
 class TaskDetailPage extends StatefulWidget {
   final Task task;
@@ -186,15 +189,23 @@ class TaskDetailPageState extends State<TaskDetailPage> {
   }
 
   buildRissItem(index) {
-    return Container(
-      decoration: BoxDecoration(
-          border:
-              Border(bottom: BorderSide(width: 1, color: Colors.grey[300]))),
-      child: TaskCheck(
-        riss: mRissList[index],
-        checkedCallBack: (riss) {
-          checkedCallBack(index,riss);
-        },
+    return FlatButton(
+      onPressed: (){
+        RouteUtils.pushPage(context, AbnormalPhenomena(mRiss: mRissList[index],));
+      },
+      child: Container(
+        decoration: BoxDecoration(
+            border:
+                Border(bottom: BorderSide(width: 1, color: Colors.grey[300]))),
+        child: TaskCheck(
+          top: 10,
+          left: 20,
+          right: 20,
+          riss: mRissList[index],
+          checkedCallBack: (riss) {
+            checkedCallBack(index,riss);
+          },
+        ),
       ),
     );
   }
@@ -374,7 +385,7 @@ class TaskDetailPageState extends State<TaskDetailPage> {
           await initEquipmentData();
           await initRissData();
         } else {
-          CommUtils.showDialog(context, "提示", "已经最后一个试卷", false,
+          CommUtils.showDialog(context, "提示", "已经最后一个任务清单", false,
               okOnPress: () {});
         }
 
@@ -422,7 +433,7 @@ class TaskDetailPageState extends State<TaskDetailPage> {
           await initEquipmentData();
           await initRissData();
         } else {
-          CommUtils.showDialog(context, "提示", "已经第一个试卷", false,
+          CommUtils.showDialog(context, "提示", "已经第一个任务清单", false,
               okOnPress: () {});
         }
         break;
@@ -472,6 +483,7 @@ class TaskDetailPageState extends State<TaskDetailPage> {
       List<Equipment> equipmentList = await equipmentProvider.getEquipmentByParentId(mPaperList[mPaperPosition].xtm);
 
       bool isComplete = false;
+      int noCompleteEquPosition = 0;
       for(int i =0;i<equipmentList.length;i++){
         RissProvider rissProvider = RissProvider();
         List<Riss> rissList = await rissProvider.getRissByParentId(equipmentList[i].xtm);
@@ -485,17 +497,28 @@ class TaskDetailPageState extends State<TaskDetailPage> {
             break;
           }
         }
+        noCompleteEquPosition = i;
         isComplete = tempBool;
         if(!tempBool){
           break;
         }
       }
       if(isComplete){
-        CommUtils.showDialog(context, "提示", "当前试卷已完成", false,okOnPress: (){});
+        CommUtils.showDialog(context, "提示", "当前任务清单已完成", false,okOnPress: (){});
       }else{
-        CommUtils.showDialog(context, "提示", "当前试卷未完成，请前往查看", false,okOnPress: (){});
+        CommUtils.showDialog(context, "提示", "当前任务清单未完成，请前往查看", false,okOnPress: (){
+          print('position:'+noCompleteEquPosition.toString());
+        jumpEquipment(noCompleteEquPosition);
+        });
       }
   }
 
+  // 跳转到未完成的设备
+  jumpEquipment(int position) async{
+    mEquipmentSelects[mEquPosition].isChecked=false;
+    mEquPosition = position;
+    mEquipmentSelects[mEquPosition].isChecked = true;
+    await initRissData();
+  }
 
 }
