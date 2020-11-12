@@ -2,15 +2,22 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dev/view/comm_views/components/wpopup_menu.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
+
+typedef _OnLongPressCallBack = void Function(int,int);
 
 class PictureShow extends StatelessWidget {
   final List<LocalMedia> image;
   final int columnSize;
   final FocusNode blankNode = FocusNode();
+  final _OnLongPressCallBack onLongPressCallBack;
+  final List<String> popupActions;
   PictureShow({
     @required this.image,
     this.columnSize = 3,
+    this.onLongPressCallBack,
+    this.popupActions,
   });
 
   Widget build(BuildContext context) {
@@ -27,17 +34,24 @@ class PictureShow extends StatelessWidget {
         crossAxisCount: columnSize,
         children: List.generate(
           image != null ? image.length : 1,
-          (index) => GestureDetector(
-            child: Padding(
-              padding: const EdgeInsets.all(0.5),
-              child: buildImage(index),
-            ),
-            onTap: () {
+          (index) => WPopupMenu(
+            menuWidth: 180,
+            actions: popupActions,
+            onValueChanged: (menuIndex){
+              onLongPressCallBack(menuIndex,index);
+            },
+            onClickTap: (){
               FocusScope.of(context).requestFocus(blankNode);
               Navigator.of(context).push(
                 NinePicture(image[index].loadPictureType, image, index),
               );
             },
+            pressType: PressType.longPress,
+            pageMaxChildCount: 3,
+            child: Padding(
+              padding: const EdgeInsets.all(0.5),
+              child: buildImage(index),
+            ),
           ),
         ),
       ),

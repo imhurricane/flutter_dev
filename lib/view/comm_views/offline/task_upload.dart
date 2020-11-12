@@ -8,6 +8,8 @@ import 'package:flutter_dev/http/address.dart';
 import 'package:flutter_dev/http/data_helper.dart';
 import 'package:flutter_dev/http/http_manager.dart';
 import 'package:flutter_dev/http/result_data.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/image.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/riss.dart';
 
 import 'moudel/riss_complete.dart';
 
@@ -22,6 +24,8 @@ class UploadTaskPageState extends State<UploadTaskPage> {
   int mTotalCount;
   int mUploadCount;
   double progressValue;
+
+
   String mButtonStr;
 
   List<RissComplete> mRissCompleteList;
@@ -32,7 +36,7 @@ class UploadTaskPageState extends State<UploadTaskPage> {
     mRissCompleteList = List();
     mTotalCount = 0;
     mUploadCount = 0;
-    progressValue=0;
+    progressValue = 0;
     mButtonStr = "数据上传";
     initCompleteTask();
   }
@@ -56,7 +60,7 @@ class UploadTaskPageState extends State<UploadTaskPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "已上传:    "+ (mUploadCount>0?(progressValue * 100).toString()+"%":"0/"+mTotalCount.toString()).toString(),
+              "任务数据上传:    "+ (mUploadCount>0?(progressValue * 100).toString()+"%":"0/"+mTotalCount.toString()).toString(),
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(
@@ -112,9 +116,9 @@ class UploadTaskPageState extends State<UploadTaskPage> {
     RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
     mRissCompleteList = await rissCompleteProvider.selectRissByIsUpload("0");
     mTotalCount = mRissCompleteList.length;
-    mRissCompleteList.forEach((element) {
-      print('element:'+element.toJson().toString());
-    });
+//    mRissCompleteList.forEach((element) {
+//      print('element:'+element.toJson().toString());
+//    });
     setState(() {});
   }
 
@@ -126,32 +130,35 @@ class UploadTaskPageState extends State<UploadTaskPage> {
     List<RissComplete> list = mRissCompleteList;
     for(int i =0;i<list.length;i++){
       RissComplete rissComplete = list[i];
-      var baseMap = DataHelper.getBaseMap();
-      baseMap.clear();
-      baseMap['data']=rissComplete.toJson();
-      ResultData result =
-      await HttpManager.getInstance().post(Address.UploadTask_URL, baseMap);
+      List<RissImages> image = rissComplete.image;
+      rissComplete.image=null;
+      ResultData result = await HttpManager.getInstance().uploadPictures(Address.UploadTask_URL, rissComplete.toJson(), image);
       if (result.code != 200) {
         CommUtils.showDialog(context, "提示", result.data, false, okOnPress: () {});
       } else {
         Map<String, dynamic> json = jsonDecode(result.data);
         if(json['code']==200){
-          print(json['msg']);
           RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
           RissComplete rissComplete = await rissCompleteProvider.getRissById(json['data']);
           rissComplete.isUpload="1";
           rissCompleteProvider.update(rissComplete);
+          RissProvider rissProvider = RissProvider();
+          Riss riss = await rissProvider.getRissById(json['data']);
+          riss.image.forEach((element) {
+            element.isUpload=true;
+          });
+          await rissProvider.update(riss, false);
 
           setState(() {
             if(mUploadCount<mTotalCount){
               mUploadCount++;
               String str = (mUploadCount/mTotalCount).toString();
               str = str.substring(0,str.length>6?6:str.length);
-              print('str:'+str);
               progressValue = double.parse(str);
             }
             mButtonStr = "重新上传";
           });
+          await CommUtils.showDialog(context, "提示", json['msg'], false,okOnPress: (){});
         }
       }
     }

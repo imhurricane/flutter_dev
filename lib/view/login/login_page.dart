@@ -453,7 +453,7 @@ class LoginPageState extends State<LoginPage>
     baseMap['password'] = pwTextEditingController.text.trim();
     String ip = ipTextEditingController.text.trim();
     await StorageUtils.saveString("ip", ip);
-    Address.BASE_URL = ip;
+    Address.setBaseUrl(ip);
     if (ipTextEditingController.text.trim().length == 0) {
       FlutterToast.showToast(msg: "IP不能为空!");
       animationController.reverse();

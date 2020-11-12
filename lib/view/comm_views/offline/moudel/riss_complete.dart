@@ -1,5 +1,8 @@
 
+import 'dart:convert';
+
 import 'package:flutter_dev/db/base_db_provider.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/image.dart';
 import 'package:sqflite/sqflite.dart';
 
 class RissComplete {
@@ -16,6 +19,7 @@ class RissComplete {
   String checkData;
   String isUpload;
   String yhXtm;
+  List<RissImages> image;
 
   RissComplete(
       {this.xtm,
@@ -31,22 +35,30 @@ class RissComplete {
         this.checkData,
         this.isUpload,
         this.yhXtm,
+        this.image,
       });
 
-  RissComplete.fromJson(Map<String, dynamic> json) {
-    xtm = json['xtm'];
-    errdetail = json['errdetail'];
-    parentxtm = json['parentxtm'];
-    rwxtm = json['rwxtm'];
-    pjjb = json['pjjb'];
-    riskfactors = json['riskfactors'];
-    fxffcs = json['fxffcs'];
-    inactivemesure = json['inactivemesure'];
-    activemesure = json['activemesure'];
-    havemesure = json['havemesure'];
-    checkData = json['checkData'];
-    isUpload = json['isUpload'];
-    yhXtm = json['yhXtm'];
+  RissComplete.fromJson(Map<String, dynamic> data) {
+    xtm = data['xtm'];
+    errdetail = data['errdetail'];
+    parentxtm = data['parentxtm'];
+    rwxtm = data['rwxtm'];
+    pjjb = data['pjjb'];
+    riskfactors = data['riskfactors'];
+    fxffcs = data['fxffcs'];
+    inactivemesure = data['inactivemesure'];
+    activemesure = data['activemesure'];
+    havemesure = data['havemesure'];
+    checkData = data['checkData'];
+    isUpload = data['isUpload'];
+    yhXtm = data['yhXtm'];
+    image = List();
+    List decode = json.decode(data['image']);
+    if(null != decode){
+      decode.forEach((v) {
+        image.add(RissImages.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -64,6 +76,9 @@ class RissComplete {
     data['checkData'] = this.checkData;
     data['isUpload'] = this.isUpload;
     data['yhXtm'] = this.yhXtm;
+    if (this.image != null) {
+      data['image'] = this.image.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -86,6 +101,7 @@ class RissCompleteProvider extends BaseDbProvider{
   final String columnCheckData = "checkData";
   final String columnIsUpload = "isUpload";
   final String columnYhXtm = "yhXtm";
+  final String columnImage = "image";
 
   @override
   tableName() {
@@ -108,6 +124,7 @@ class RissCompleteProvider extends BaseDbProvider{
         $columnCheckData text not null,
         $columnIsUpload text not null,
         $columnYhXtm text not null,
+        $columnImage text,
         $columnHavemesure text not null)
       ''';
   }
@@ -174,6 +191,7 @@ class RissCompleteProvider extends BaseDbProvider{
   //更新数据
   Future<int> update(RissComplete riss) async {
     var database = await getDataBase();
+    String encode = json.encode(riss.image);
     var result = await database.rawUpdate(
         "update $name set "
             "$columnId = ?,"
@@ -188,11 +206,12 @@ class RissCompleteProvider extends BaseDbProvider{
             "$columnCheckData = ?,"
             "$columnIsUpload = ?,"
             "$columnYhXtm = ?,"
+            "$columnImage = ?,"
             "$columnHavemesure = ?"
             " where $columnId= ?",
         [riss.xtm,riss.rwxtm,riss.errdetail,riss.parentxtm,riss.pjjb,riss.riskfactors,
           riss.fxffcs,riss.inactivemesure,riss.activemesure,
-          riss.checkData,riss.isUpload,riss.yhXtm,riss.havemesure,riss.xtm]);
+          riss.checkData,riss.isUpload,riss.yhXtm,encode,riss.havemesure,riss.xtm]);
     return result;
   }
 

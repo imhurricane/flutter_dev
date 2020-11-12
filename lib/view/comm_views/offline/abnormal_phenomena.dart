@@ -1,12 +1,21 @@
+import 'dart:convert';
+
+import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dev/comm/comm_utils.dart';
+import 'package:flutter_dev/comm/storage_utils.dart';
+import 'package:flutter_dev/moudel/user_bean.dart';
 import 'package:flutter_dev/view/comm_views/components/comm_bottom_action.dart';
 import 'package:flutter_dev/view/comm_views/components/float_button.dart';
 import 'package:flutter_dev/view/comm_views/components/picture_show.dart';
 import 'package:flutter_dev/view/comm_views/components/task_check_view.dart';
 import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss.dart';
+import 'package:flutter_dev/view/login/moudel/user.dart';
+
+import 'moudel/image.dart';
+import 'moudel/riss_complete.dart';
 
 class AbnormalPhenomena extends StatefulWidget {
   final Riss mRiss;
@@ -24,25 +33,19 @@ class AbnormalPhenomena extends StatefulWidget {
 class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
   FocusNode blankNode = FocusNode();
   List<LocalMedia> images = List<LocalMedia>();
-  List<String> imgPaths = List();
   TextEditingController textEditingController;
+  LoginUser loginUser;
+  List<String> popupActions = List();
 
   @override
   void initState() {
     super.initState();
     textEditingController = TextEditingController();
     textEditingController.text = widget.mRiss.errdetail;
-    if(null != widget.mRiss.imgPath){
-
-      List<String> split = widget.mRiss.imgPath.replaceAll("]", "").replaceAll("[", "").replaceAll(" ","").split(",");
-      split.forEach((element) {
-        LocalMedia localMedia = LocalMedia();
-        localMedia.path=element;
-        localMedia.loadPictureType=LoadPictureType.file;
-        images.add(localMedia);
-      });
-    }
-
+    loginUser = loginUser = LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
+    popupActions.add("删除");
+    popupActions.add("设为待上传");
+    initData();
   }
 
   @override
@@ -94,12 +97,8 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
                 CommBottomAction.result = "";
                 String imagePath = await CommBottomAction.action(context, 1005);
                 if (null != imagePath && imagePath.length > 0) {
-                  LocalMedia localMedia = LocalMedia();
-                  localMedia.realPath = imagePath;
-                  localMedia.path = imagePath;
-                  localMedia.loadPictureType = LoadPictureType.file;
                   setState(() {
-                    images.add(localMedia);
+                    addPicture(imagePath);
                   });
                 }
               },
@@ -110,12 +109,9 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
                 CommBottomAction.result = "";
                 String imagePath = await CommBottomAction.action(context, 1004);
                 if (null != imagePath && imagePath.length > 0) {
-                  LocalMedia localMedia = LocalMedia();
-                  localMedia.realPath = imagePath;
-                  localMedia.path = imagePath;
-                  localMedia.loadPictureType = LoadPictureType.file;
+                  print('imagePath：'+imagePath);
                   setState(() {
-                    images.add(localMedia);
+                    addPicture(imagePath);
                   });
                 }
               },
@@ -123,15 +119,7 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
             ),
             FloatButton(
               onPressed: () async{
-                FocusScope.of(context).requestFocus(blankNode);
-                images.forEach((element) {
-                  imgPaths.add(element.path);
-                });
-                widget.mRiss.imgPath=imgPaths.toString();
-                widget.mRiss.errdetail=textEditingController.text.trim();
-                RissProvider rissProvider = RissProvider();
-                await rissProvider.update(widget.mRiss, false);
-                await CommUtils.showDialog(context, "提示", "保存成功", false,okOnPress: (){});
+                await save();
               },
               value: "保存",
             ),
@@ -201,6 +189,23 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
                 margin: EdgeInsets.only(top: 8.0, left: 20, right: 20),
                 padding: EdgeInsets.all(0.0),
                 child: PictureShow(
+                  popupActions: popupActions,
+                  onLongPressCallBack: (menuIndex,index) async{
+                    switch(menuIndex){
+                      case 0:
+                        widget.mRiss.image.removeAt(index);
+                        await CommUtils.showDialog(context, "提示", "删除成功!", false,okOnPress: (){});
+                        break;
+                      case 1:
+                        widget.mRiss.image[index].isUpload=false;
+                        await CommUtils.showDialog(context, "提示", "设置成功!", false,okOnPress: (){});
+                        break;
+                    }
+                    initData();
+                    setState(() {
+
+                    });
+                  },
                   image: images == null ? "" : images,
                   columnSize: 3,
                 ),
@@ -208,5 +213,63 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
             : Container(),
       ),
     );
+  }
+
+  initData() {
+    images.clear();
+    if(null != widget.mRiss.image){
+      widget.mRiss.image.forEach((element) {
+        LocalMedia localMedia = LocalMedia();
+        localMedia.path=element.path;
+        localMedia.loadPictureType=LoadPictureType.file;
+        images.add(localMedia);
+      });
+    }
+  }
+
+  save() async{
+    FocusScope.of(context).requestFocus(blankNode);
+    List<RissImages> images = List();
+    images.forEach((element) {
+      RissImages rissImages = RissImages();
+      rissImages.path=element.path;
+      rissImages.date=DateUtil.formatDate(DateTime.now(),format: "yyyy-MM-dd HH:mm:ss");
+      rissImages.yhxtm=loginUser.yhxtm;
+      images.add(rissImages);
+    });
+    widget.mRiss.errdetail=textEditingController.text.trim();
+    RissProvider rissProvider = RissProvider();
+    await rissProvider.update(widget.mRiss, true);
+    RissComplete rissComplete = RissComplete();
+    rissComplete.xtm=widget.mRiss.xtm;
+    rissComplete.errdetail=widget.mRiss.errdetail;
+    rissComplete.parentxtm=widget.mRiss.parentxtm;
+    rissComplete.rwxtm=widget.mRiss.rwxtm;
+    rissComplete.pjjb=widget.mRiss.pjjb;
+    rissComplete.riskfactors=widget.mRiss.riskfactors;
+    rissComplete.fxffcs=widget.mRiss.fxffcs;
+    rissComplete.inactivemesure=widget.mRiss.inactivemesure;
+    rissComplete.activemesure=widget.mRiss.activemesure;
+    rissComplete.havemesure=widget.mRiss.havemesure;
+    rissComplete.checkData=DateUtil.formatDate(DateTime.now(), format: "yyyy-MM-dd HH:mm:ss");;
+    rissComplete.isUpload="0";
+    rissComplete.yhXtm=loginUser.yhxtm;
+    rissComplete.image=widget.mRiss.image;
+    RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
+    await rissCompleteProvider.insertRiss(rissComplete);
+    await CommUtils.showDialog(context, "提示", "保存成功", false,okOnPress: (){});
+  }
+
+  addPicture(String imagePath){
+    RissImages rissImages = RissImages();
+    rissImages.path=imagePath;
+    rissImages.yhxtm=loginUser.yhxtm;
+    rissImages.date=DateUtil.formatDate(DateTime.now(),format: "yyyy-MM-dd HH:mm:ss");
+    rissImages.isUpload=false;
+    if(widget.mRiss.image == null){
+      widget.mRiss.image = List<RissImages>();
+    }
+    widget.mRiss.image.add(rissImages);
+    initData();
   }
 }

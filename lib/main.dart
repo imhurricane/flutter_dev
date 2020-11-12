@@ -21,8 +21,6 @@ void main() async{
 //        statusBarIconBrightness: Brightness.dark
     );
     SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
-
-    print("systemUiOverlayStyle");
   }
 }
 
@@ -81,11 +79,9 @@ class RootAppState extends State<RootApp> {
   }
 
   initPermission() async{
-
     for(int i=0;i<widget.permissions.length;i++){
       await requestPermission(widget.permissions[i]);
     }
-
   }
 
 }

@@ -1,5 +1,8 @@
 
+import 'dart:convert';
+
 import 'package:flutter_dev/db/base_db_provider.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/image.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Riss {
@@ -13,7 +16,7 @@ class Riss {
   String inactivemesure;
   String activemesure;
   String havemesure;
-  String imgPath;
+  List<RissImages> image;
 
   Riss(
       {this.xtm,
@@ -26,21 +29,28 @@ class Riss {
         this.inactivemesure,
         this.activemesure,
         this.havemesure,
-        this.imgPath,
+        this.image,
       });
 
-  Riss.fromJson(Map<String, dynamic> json) {
-    xtm = json['xtm'];
-    errdetail = json['errdetail'];
-    parentxtm = json['parentxtm'];
-    rwxtm = json['rwxtm'];
-    pjjb = json['pjjb'];
-    riskfactors = json['riskfactors'];
-    fxffcs = json['fxffcs'];
-    inactivemesure = json['inactivemesure'];
-    activemesure = json['activemesure'];
-    havemesure = json['havemesure'];
-    imgPath = json['imgPath'];
+  Riss.fromJson(Map<String, dynamic> data) {
+    xtm = data['xtm'];
+    errdetail = data['errdetail'];
+    parentxtm = data['parentxtm'];
+    rwxtm = data['rwxtm'];
+    pjjb = data['pjjb'];
+    riskfactors = data['riskfactors'];
+    fxffcs = data['fxffcs'];
+    inactivemesure = data['inactivemesure'];
+    activemesure = data['activemesure'];
+    havemesure = data['havemesure'];
+    if(data['image']!=null){
+      List decode = json.decode(data['image']);
+      image = List();
+      decode.forEach((v) {
+        image.add(new RissImages.fromJson(v));
+      });
+    }
+
   }
 
   Map<String, dynamic> toJson() {
@@ -55,7 +65,9 @@ class Riss {
     data['inactivemesure'] = this.inactivemesure;
     data['activemesure'] = this.activemesure;
     data['havemesure'] = this.havemesure;
-    data['imgPath'] = this.imgPath;
+    if (this.image != null) {
+      data['image'] = this.image.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -75,7 +87,7 @@ class RissProvider extends BaseDbProvider{
   final String columnInactivemesure = "inactivemesure";
   final String columnActivemesure = "activemesure";
   final String columnHavemesure = "havemesure";
-  final String columnImgPath = "imgPath";
+  final String columnImage = "image";
 
   @override
   tableName() {
@@ -95,7 +107,7 @@ class RissProvider extends BaseDbProvider{
         $columnFxffcs text not null,
         $columnInactivemesure text not null,
         $columnActivemesure text not null,
-        $columnImgPath text,
+        $columnImage text,
         $columnHavemesure text not null)
       ''';
   }
@@ -126,9 +138,12 @@ class RissProvider extends BaseDbProvider{
 
   //根据id查询
   Future<Riss> getRissById(String id) async {
-    var mapList = await selectRissById(id); // Get 'Map List' from database
-    var user = Riss.fromJson(mapList[id]);
-    return user;
+    Riss riss;
+    List<Map<String,dynamic>> mapList = await selectRissById(id); // Get 'Map List' from database
+    if(mapList.length==1){
+      riss = Riss.fromJson(mapList[0]);
+    }
+    return riss;
   }
 
   //增加数据
@@ -154,7 +169,7 @@ class RissProvider extends BaseDbProvider{
         "$columnParentxtm = ?,"
         "$columnPjjb = ?,"
         "$columnRiskfactors = ?,"
-        "$columnImgPath = ?,"
+        "$columnImage = ?,"
         "$columnFxffcs = ?";
     List list = new List();
     list.add(riss.xtm);
@@ -163,7 +178,8 @@ class RissProvider extends BaseDbProvider{
     list.add(riss.parentxtm);
     list.add(riss.pjjb);
     list.add(riss.riskfactors);
-    list.add(riss.imgPath);
+    String encode = json.encode(riss.image);
+    list.add(encode);
     list.add(riss.fxffcs);
 
     if(isUpdateCom){

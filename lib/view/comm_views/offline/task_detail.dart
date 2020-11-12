@@ -13,6 +13,7 @@ import 'package:flutter_dev/view/comm_views/offline/moudel/riss.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss_complete.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/task.dart';
 
+import '../../../main.dart';
 import 'abnormal_phenomena.dart';
 
 class TaskDetailPage extends StatefulWidget {
@@ -26,7 +27,7 @@ class TaskDetailPage extends StatefulWidget {
   }
 }
 
-class TaskDetailPageState extends State<TaskDetailPage> {
+class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
   ScrollController mListViewController;
   List<Task> mTaskList;
   List<Selects> mTaskSelects;
@@ -507,7 +508,6 @@ class TaskDetailPageState extends State<TaskDetailPage> {
         CommUtils.showDialog(context, "提示", "当前任务清单已完成", false,okOnPress: (){});
       }else{
         CommUtils.showDialog(context, "提示", "当前任务清单未完成，请前往查看", false,okOnPress: (){
-          print('position:'+noCompleteEquPosition.toString());
         jumpEquipment(noCompleteEquPosition);
         });
       }
@@ -521,4 +521,17 @@ class TaskDetailPageState extends State<TaskDetailPage> {
     await initRissData();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 监听路由
+    RootApp.routeObserver.subscribe(this, ModalRoute.of(context));
+  }
+
+  @override
+  void didPopNext() async{
+    super.didPopNext();
+    // 当从其他页面返回当前页面时出发此方法
+    await initRissData();
+  }
 }

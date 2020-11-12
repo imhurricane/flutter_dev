@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:dio/dio.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/image.dart';
 
 import 'address.dart';
 import 'code.dart';
@@ -82,6 +85,29 @@ class HttpManager {
 //      return resultError(response.data['code']);
     }
 
+    return response.data;
+  }
+
+  uploadPictures(api,Map<String, dynamic> params,List<RissImages> images) async{
+    Response response;
+
+    var formData = FormData();
+    images.forEach((element) {
+      if(!element.isUpload){
+        var name = element.path.substring(element.path.lastIndexOf("/") + 1, element.path.length);
+        var mapEntry = MapEntry(
+          "files",
+          MultipartFile.fromFileSync(element.path,
+              filename: name),
+        );
+        formData.files.add(mapEntry);
+      }
+    });
+    try {
+      response = await _dio.post(api,data: formData,queryParameters: params);
+    } on DioError catch (e) {
+      return resultError(e);
+    }
     return response.data;
   }
 

@@ -59,7 +59,7 @@ class MainPageState extends State<MainPage> {
   initData() async{
     String ip = StorageUtils.getStringWithKey("ip");
     if(ip != null && ip.length>0){
-      Address.BASE_URL=ip;
+      Address.setBaseUrl(ip);
     }else{
       Address.BASE_URL = "http://192.168.1.166:7001";
     }
