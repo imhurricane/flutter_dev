@@ -245,7 +245,7 @@ class LocalMedia {
     mimeType = json['mimeType'];
     realPath = json['realPath'];
     path = json['path'];
-    loadPictureType = json['isLocal'];
+    loadPictureType = json['loadPictureType']==null?LoadPictureType.netWork:json['loadPictureType'];
   }
 
   Map<String, dynamic> toJson() {
@@ -253,7 +253,7 @@ class LocalMedia {
     data['mimeType'] = this.mimeType;
     data['realPath'] = this.realPath;
     data['path'] = this.path;
-    data['isLocal'] = this.loadPictureType;
+    data['loadPictureType'] = this.loadPictureType;
     return data;
   }
 }

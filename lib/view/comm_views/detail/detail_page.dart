@@ -274,6 +274,22 @@ class DetailPageState extends State<DetailPage>{
      },
      child: images.length>0?Container(
         child: PictureShow(
+          popupActions: ['删除','重新上传'],
+          onLongPressCallBack: (menuIndex,index){
+            print('menuIndex:'+menuIndex.toString());
+            print('index:'+index.toString());
+//            switch(menuIndex){
+//              case 0:
+//                images.removeAt(index);
+//                break;
+//              case 1:
+//                uploadPicture(images[index].path);
+//                break;
+//            }
+            setState(() {
+
+            });
+          },
           image: images==null?"":images,
           columnSize:3,
         ),

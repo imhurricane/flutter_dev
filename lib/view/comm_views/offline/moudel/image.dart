@@ -12,7 +12,7 @@ class RissImages {
     path = json['path'];
     date = json['date'];
     yhxtm = json['yhxtm'];
-    isUpload = json['isUpdaload'];
+    isUpload = json['isUpload'];
   }
 
   Map<String, dynamic> toJson() {
@@ -20,7 +20,7 @@ class RissImages {
     data['path'] = this.path;
     data['date'] = this.date;
     data['yhxtm'] = this.yhxtm;
-    data['isUpdaload'] = this.isUpload;
+    data['isUpload'] = this.isUpload;
     return data;
   }
 }

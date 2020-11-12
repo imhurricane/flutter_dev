@@ -76,9 +76,10 @@ class PictureShow extends StatelessWidget {
         key: Key(index.toString()),
         fit: BoxFit.cover,
         alignment: Alignment.center,
-        placeholder: (context, url) => CircularProgressIndicator(
-//                   backgroundColor: Colors.pink,
-            ),
+        placeholder: (context, url) => SizedBox(
+          height: 60,
+          width: 60,
+          child: Center(child: CircularProgressIndicator(strokeWidth: 2.0,))),
         errorWidget: (context, url, error) => Icon(Icons.error),
         imageUrl: image != null
             ? image[index].realPath == null ? "" : image[index].realPath

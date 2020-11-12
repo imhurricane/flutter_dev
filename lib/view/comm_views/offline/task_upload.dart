@@ -130,7 +130,10 @@ class UploadTaskPageState extends State<UploadTaskPage> {
     List<RissComplete> list = mRissCompleteList;
     for(int i =0;i<list.length;i++){
       RissComplete rissComplete = list[i];
-      List<RissImages> image = rissComplete.image;
+      List<RissImages> image = List();
+      rissComplete.image.forEach((element) {
+        image.add(element);
+      });
       rissComplete.image=null;
       ResultData result = await HttpManager.getInstance().uploadPictures(Address.UploadTask_URL, rissComplete.toJson(), image);
       if (result.code != 200) {

@@ -35,10 +35,6 @@ class CommBottomAction {
 
   static getImageFromCamera() async {
     PickedFile image = await ImagePicker().getImage(source: ImageSource.camera,imageQuality: 50);
-//    if(image != null){
-//    File file = await FlutterImageCompress.compressAndGetFile(image.path, Directory.systemTemp.path+"/tempImg.jpg",quality: 50);
-//      result = file.absolute.path;
-//    }
     result=image.path;
     print('result:'+result);
   }
