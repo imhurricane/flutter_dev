@@ -36,6 +36,7 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
   TextEditingController textEditingController;
   LoginUser loginUser;
   List<String> popupActions = List();
+  bool isSaved=true;
 
   @override
   void initState() {
@@ -50,80 +51,94 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomPadding: false,
-      body: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              pinned: true,
-              title: Text("异常信息"),
-              centerTitle: true,
-              leading: IconButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                icon: Icon(Icons.arrow_back_ios),
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).requestFocus(blankNode);
+      },
+      child: WillPopScope(
+        onWillPop: () async{
+          if(!isSaved){
+            CommUtils.showDialog(context, "提示", "数据未保存，是否保存？", true,okOnPress: (){
+              save();
+              return false;
+            },cancelOnPress: (){
+              Navigator.of(context).pop();
+              return true;
+            });
+          }
+          return true;
+        },
+        child: Scaffold(
+          resizeToAvoidBottomPadding: false,
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return [
+                SliverAppBar(
+                  pinned: true,
+                  title: Text("异常信息"),
+                  centerTitle: true,
+                  leading: IconButton(
+                    onPressed: () {
+                      checkSaved();
+                    },
+                    icon: Icon(Icons.arrow_back_ios),
+                  ),
+                ),
+              ];
+            },
+            controller: ScrollController(),
+            body: Container(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildRissInfo(),
+                  buildTextField(),
+                  buildPicture(),
+                ],
               ),
             ),
-          ];
-        },
-        controller: ScrollController(),
-        body: Container(
-          child: GestureDetector(
-            onTap: () {
-              FocusScope.of(context).requestFocus(blankNode);
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          bottomNavigationBar: Padding(
+            padding: const EdgeInsets.only(left: 40.0, right: 40),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                buildRissInfo(),
-                buildTextField(),
-                buildPicture(),
+                FloatButton(
+                  onPressed: () async {
+                    CommBottomAction.result = "";
+                    String imagePath = await CommBottomAction.action(context, 1005);
+                    if (null != imagePath && imagePath.length > 0) {
+                      setState(() {
+                        addPicture(imagePath);
+                      });
+                    }
+                  },
+                  value: "拍照",
+                ),
+                FloatButton(
+                  onPressed: () async {
+                    CommBottomAction.result = "";
+                    String imagePath = await CommBottomAction.action(context, 1004);
+                    if (null != imagePath && imagePath.length > 0) {
+                      print('imagePath：'+imagePath);
+                      setState(() {
+                        addPicture(imagePath);
+                      });
+                    }
+                  },
+                  value: "相册",
+                ),
+                FloatButton(
+                  onPressed: () async{
+                    await save();
+                  },
+                  value: "保存",
+                ),
               ],
             ),
           ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 40.0, right: 40),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            FloatButton(
-              onPressed: () async {
-                CommBottomAction.result = "";
-                String imagePath = await CommBottomAction.action(context, 1005);
-                if (null != imagePath && imagePath.length > 0) {
-                  setState(() {
-                    addPicture(imagePath);
-                  });
-                }
-              },
-              value: "拍照",
-            ),
-            FloatButton(
-              onPressed: () async {
-                CommBottomAction.result = "";
-                String imagePath = await CommBottomAction.action(context, 1004);
-                if (null != imagePath && imagePath.length > 0) {
-                  print('imagePath：'+imagePath);
-                  setState(() {
-                    addPicture(imagePath);
-                  });
-                }
-              },
-              value: "相册",
-            ),
-            FloatButton(
-              onPressed: () async{
-                await save();
-              },
-              value: "保存",
-            ),
-          ],
         ),
       ),
     );
@@ -140,6 +155,7 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
           widget.mRiss.activemesure=riss.activemesure;
           widget.mRiss.inactivemesure=riss.inactivemesure;
           widget.mRiss.havemesure=riss.havemesure;
+          isSaved = false;
         });
       },
     );
@@ -151,6 +167,9 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
       child: TextField(
         maxLines: 8,
         controller: textEditingController,
+        onChanged: (str){
+          isSaved = false;
+        },
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.all(2.0),
           hintText: '请输入异常信息',
@@ -194,11 +213,11 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
                     switch(menuIndex){
                       case 0:
                         widget.mRiss.image.removeAt(index);
-                        await CommUtils.showDialog(context, "提示", "删除成功!", false,okOnPress: (){});
+                        await CommUtils.showDialog(context, "提示", "删除成功!", false,okOnPress: (){isSaved = false;});
                         break;
                       case 1:
                         widget.mRiss.image[index].isUpload=false;
-                        await CommUtils.showDialog(context, "提示", "设置成功!", false,okOnPress: (){});
+                        await CommUtils.showDialog(context, "提示", "设置成功!", false,okOnPress: (){isSaved = false;});
                         break;
                     }
                     initData();
@@ -258,6 +277,7 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
     RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
     await rissCompleteProvider.insertRiss(rissComplete);
     await CommUtils.showDialog(context, "提示", "保存成功", false,okOnPress: (){});
+    isSaved=true;
   }
 
   addPicture(String imagePath){
@@ -271,5 +291,18 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
     }
     widget.mRiss.image.add(rissImages);
     initData();
+    isSaved = false;
+  }
+
+  checkSaved() async{
+    if(!isSaved){
+      CommUtils.showDialog(context, "提示", "数据未保存，是否保存？", true,okOnPress: (){
+        save();
+      },cancelOnPress: (){
+        Navigator.of(context).pop();
+      });
+    }else{
+      Navigator.of(context).pop();
+    }
   }
 }

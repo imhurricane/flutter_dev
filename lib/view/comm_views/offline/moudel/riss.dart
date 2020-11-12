@@ -44,7 +44,7 @@ class Riss {
     activemesure = data['activemesure'];
     havemesure = data['havemesure'];
     if(data['image']!=null){
-      List decode = json.decode(data['image']);
+      List decode = json.decode(data['image'])==null?List():json.decode(data['image']);
       image = List();
       decode.forEach((v) {
         image.add(new RissImages.fromJson(v));
