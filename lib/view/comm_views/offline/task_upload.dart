@@ -128,6 +128,7 @@ class UploadTaskPageState extends State<UploadTaskPage> {
       mButtonStr = "正在上传请稍后...";
     });
     List<RissComplete> list = mRissCompleteList;
+    bool isUploadSuccess = false;
     for(int i =0;i<list.length;i++){
       RissComplete rissComplete = list[i];
       List<RissImages> image = List();
@@ -136,34 +137,37 @@ class UploadTaskPageState extends State<UploadTaskPage> {
       });
       rissComplete.image=null;
       ResultData result = await HttpManager.getInstance().uploadPictures(Address.UploadTask_URL, rissComplete.toJson(), image);
-      if (result.code != 200) {
+      Map<String, dynamic> json = jsonDecode(result.data);
+      if (json['code'] != 200) {
+        isUploadSuccess = false;
         CommUtils.showDialog(context, "提示", result.data, false, okOnPress: () {});
+        break;
       } else {
-        Map<String, dynamic> json = jsonDecode(result.data);
-        if(json['code']==200){
-          RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
-          RissComplete rissComplete = await rissCompleteProvider.getRissById(json['data']);
-          rissComplete.isUpload="1";
-          rissCompleteProvider.update(rissComplete);
-          RissProvider rissProvider = RissProvider();
-          Riss riss = await rissProvider.getRissById(json['data']);
-          riss.image.forEach((element) {
-            element.isUpload=true;
-          });
-          await rissProvider.update(riss, false);
+        isUploadSuccess = true;
+        RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
+        RissComplete rissComplete = await rissCompleteProvider.getRissById(json['data']);
+        rissComplete.isUpload="1";
+        rissCompleteProvider.update(rissComplete);
+        RissProvider rissProvider = RissProvider();
+        Riss riss = await rissProvider.getRissById(json['data']);
+        riss.image.forEach((element) {
+          element.isUpload=true;
+        });
+        await rissProvider.update(riss, false);
 
-          setState(() {
-            if(mUploadCount<mTotalCount){
-              mUploadCount++;
-              String str = (mUploadCount/mTotalCount).toString();
-              str = str.substring(0,str.length>6?6:str.length);
-              progressValue = double.parse(str);
-            }
-            mButtonStr = "重新上传";
-          });
-          await CommUtils.showDialog(context, "提示", json['msg'], false,okOnPress: (){});
-        }
+        setState(() {
+          if(mUploadCount<mTotalCount){
+            mUploadCount++;
+            String str = (mUploadCount/mTotalCount).toString();
+            str = str.substring(0,str.length>6?6:str.length);
+            progressValue = double.parse(str);
+          }
+          mButtonStr = "重新上传";
+        });
       }
+    }
+    if(isUploadSuccess) {
+      await CommUtils.showDialog(context, "提示", "上传成功！", false,okOnPress: (){});
     }
   }
 

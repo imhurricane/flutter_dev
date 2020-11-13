@@ -208,6 +208,22 @@ class RissProvider extends BaseDbProvider{
     Database db = await getDataBase();
     return await db.rawQuery("select * from $name where $columnParentxtm = '$parentId'");
   }
+  ///查询数据
+  Future selectRissByTaskId(String taskId) async {
+    Database db = await getDataBase();
+    return await db.rawQuery("select * from $name where $columnRwxtm = '$taskId'");
+  }
+
+
+  Future<List<Riss>> getRissByTaskId(String taskId) async{
+    var mapList = await selectRissByTaskId(taskId);
+    var count = mapList.length;
+    List<Riss> list = List<Riss>();
+    for (int i = 0; i < count; i++) {
+      list.add(Riss.fromJson(mapList[i]));
+    }
+    return list;
+  }
 
   Future<List<Riss>> getRissByParentId(String parentId) async{
     var mapList = await selectRissByParentId(parentId);

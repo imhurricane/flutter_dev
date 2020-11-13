@@ -53,10 +53,13 @@ class RissComplete {
     isUpload = data['isUpload'];
     yhXtm = data['yhXtm'];
     image = List();
-    List decode = json.decode(data['image'])==null?List():json.decode(data['image']);
-    decode.forEach((v) {
-      image.add(RissImages.fromJson(v));
-    });
+    if(data['image']!=null){
+      List decode = json.decode(data['image'])==null?List():json.decode(data['image']);
+      decode.forEach((v) {
+        image.add(RissImages.fromJson(v));
+      });
+    }
+
   }
 
   Map<String, dynamic> toJson() {

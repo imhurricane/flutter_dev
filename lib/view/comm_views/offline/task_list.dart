@@ -1,25 +1,17 @@
-
-import 'dart:convert';
-
-import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dev/comm/comm_utils.dart';
 import 'package:flutter_dev/comm/storage_utils.dart';
-import 'package:flutter_dev/http/address.dart';
-import 'package:flutter_dev/http/data_helper.dart';
-import 'package:flutter_dev/http/http_manager.dart';
-import 'package:flutter_dev/http/result_data.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
-import 'package:flutter_dev/view/comm_views/components/progress.dart';
 import 'package:flutter_dev/view/comm_views/moudel/page_info.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/paper.dart';
 import 'package:flutter_dev/view/comm_views/offline/task_detail.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+import '../../../main.dart';
+import 'moudel/riss.dart';
 import 'moudel/task.dart';
 
 class TaskListPage extends StatefulWidget {
@@ -29,13 +21,14 @@ class TaskListPage extends StatefulWidget {
   }
 }
 
-class TaskListPageState extends State<TaskListPage> {
+class TaskListPageState extends State<TaskListPage> with RouteAware{
   RefreshController mRefreshController = new RefreshController();
   ClassicFooter footer = new ClassicFooter();
   PageInfo pageInfo = PageInfo();
 
   List<Task> mData;
   double isDownloadComp;
+  String complementText = "";
 
   @override
   void initState() {
@@ -67,16 +60,6 @@ class TaskListPageState extends State<TaskListPage> {
                   },
                   icon: Icon(Icons.arrow_back_ios),
                 ),
-//                actions: [
-//                  IconButton(
-////                  padding: EdgeInsets.only(right: 20),
-//                    icon: Icon(
-//                      Icons.menu,
-//                      color: Colors.white,
-//                    ),
-//                    onPressed: () {},
-//                  ),
-//                ],
               ),
             ];
           },
@@ -103,11 +86,11 @@ class TaskListPageState extends State<TaskListPage> {
   buildBody() {
     return mData.length > 0
         ? ListView.builder(
-        itemCount: mData.length,
-        padding: EdgeInsets.all(0),
-        itemBuilder: (context, index) {
-          return buildListItem(index);
-        })
+            itemCount: mData.length,
+            padding: EdgeInsets.all(0),
+            itemBuilder: (context, index) {
+              return buildListItem(index);
+            })
         : PageLoading();
   }
 
@@ -115,11 +98,11 @@ class TaskListPageState extends State<TaskListPage> {
     return Card(
       elevation: 0.0,
       child: InkWell(
-        onTap: (){
+        onTap: () {
           RouteUtils.pushPage(context, TaskDetailPage(mData[index]));
         },
         child: Container(
-          height: 100,
+          height: 80,
           padding: const EdgeInsets.all(8.0),
           child: Row(
             mainAxisSize: MainAxisSize.max,
@@ -135,9 +118,6 @@ class TaskListPageState extends State<TaskListPage> {
                       mData[index].description,
                       style: TextStyle(fontSize: 16, color: Colors.black),
                     ),
-//                    Text("状态:    ${mData[index].comp == "0" ? "未完成" : "已完成"}",
-//                        style:
-//                        TextStyle(fontSize: 16, color: Colors.grey[600])),
                   ],
                 ),
               ),
@@ -146,7 +126,10 @@ class TaskListPageState extends State<TaskListPage> {
               ),
               Expanded(
                 flex: 2,
-                child: Text(mData[index].comp=="1"?"已完成":"未完成",style: TextStyle(color: Colors.lightBlue,fontSize: 16),),
+                child: Text(
+                  complementText,
+                  style: TextStyle(color: Colors.lightBlue, fontSize: 16),
+                ),
               ),
             ],
           ),
@@ -156,15 +139,39 @@ class TaskListPageState extends State<TaskListPage> {
   }
 
   initData() async {
-    LoginUser user = LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
+    mData.clear();
     TaskProvider taskProvider = TaskProvider();
-    mData = await taskProvider.getAllTask();
-//    mData.addAll(tasks);
-    if(mData.length==0){
-      CommUtils.showDialog(context, "提示", "暂无数据，请先下载任务", true,okOnPress: (){
+    List<Task> tasks = await taskProvider.getAllTask();
+    if (tasks.length == 0) {
+      CommUtils.showDialog(context, "提示", "暂无数据，请先下载任务", true, okOnPress: () {
         Navigator.of(context).pop();
       });
     }
+    bool isComplement = true;
+    bool isComplementPart = false; // 部分完成
+    for(int i = 0; i < tasks.length; i++){
+      RissProvider rissProvider = RissProvider();
+      List<Riss> rissList = await rissProvider.getRissByTaskId(tasks[i].xtm);
+      for(int j = 0; j < rissList.length; j++){
+        Riss riss = rissList[j];
+        if ((riss.havemesure == null || riss.havemesure == '0') &&
+            (riss.activemesure == null || riss.activemesure == '0') &&
+            (riss.inactivemesure == null || riss.inactivemesure == '0')) {
+          isComplement = false;
+        }else{
+          isComplementPart = true;
+        }
+      }
+      if (isComplement) {
+        complementText = '已完成';
+      } else if(!isComplement && isComplementPart){
+        complementText = '部分完成';
+      }else if(!isComplement && !isComplementPart){
+        complementText = '未完成';
+      }
+      mData.add(tasks[i]);
+    }
+
     setState(() {});
   }
 
@@ -182,5 +189,19 @@ class TaskListPageState extends State<TaskListPage> {
 
   onPressItem(Task task) {
     RouteUtils.pushPage(context, TaskDetailPage(task));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 监听路由
+    RootApp.routeObserver.subscribe(this, ModalRoute.of(context));
+  }
+
+  @override
+  void didPopNext() async{
+    super.didPopNext();
+    // 当从其他页面返回当前页面时出发此方法
+    await initData();
   }
 }

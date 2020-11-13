@@ -15,6 +15,7 @@ import 'package:flutter_dev/view/comm_views/offline/moudel/task.dart';
 
 import '../../../main.dart';
 import 'abnormal_phenomena.dart';
+import 'moudel/current_check_info.dart';
 
 class TaskDetailPage extends StatefulWidget {
   final Task task;
@@ -43,7 +44,8 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
 
   List<Riss> mRissList;
   List<Selects> mRissSelects;
-  int mRissPosition;
+
+  CurrentCheckInfo mCheckInfo;
 
   @override
   void initState() {
@@ -66,110 +68,120 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
 
     mRissSelects = List();
 
+    mCheckInfo = CurrentCheckInfo();
     initTaskData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text("任务排查"),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          icon: Icon(Icons.arrow_back_ios),
-        ),
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(4.0),
-        child: Column(
-          children: [
-            buildTaskSpinner(),
-            SizedBox(
-              height: 4,
+    return GestureDetector(
+      child: WillPopScope(
+        onWillPop: () async{
+          saveCurrentCheckInfo();
+          return true;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text("任务排查"),
+            leading: IconButton(
+              onPressed: () {
+                saveCurrentCheckInfo();
+                Navigator.of(context).pop();
+              },
+              icon: Icon(Icons.arrow_back_ios),
             ),
-            buildPaperSpinner(),
-            SizedBox(
-              height: 4,
-            ),
-            buildEquipmentSpinner(),
-            SizedBox(
-              height: 4,
-            ),
-            Column(
+          ),
+          body: Container(
+            padding: const EdgeInsets.all(4.0),
+            child: Column(
               children: [
-                Container(
-                    margin: EdgeInsets.only(left: 36, right: 36),
-                    width: double.infinity,
-                    child: Text(
-                      "排查项目",
-                      style: TextStyle(color: Colors.lightBlue),
-                    )),
-                Container(
-                  margin: EdgeInsets.only(left: 36, right: 36),
-                  height: 1,
-                  color: Colors.lightBlue,
+                buildTaskSpinner(),
+                SizedBox(
+                  height: 4,
                 ),
-              ],
-            ),
-            buildRiss(),
-            Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(left: 36, right: 36),
-                  height: 1,
-                  color: Colors.lightBlue,
+                buildPaperSpinner(),
+                SizedBox(
+                  height: 4,
                 ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ButtonBar(
+                buildEquipmentSpinner(),
+                SizedBox(
+                  height: 4,
+                ),
+                Column(
                   children: [
-                    RaisedButton(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                      ),
+                    Container(
+                        margin: EdgeInsets.only(left: 36, right: 36),
+                        width: double.infinity,
+                        child: Text(
+                          "排查项目",
+                          style: TextStyle(color: Colors.lightBlue),
+                        )),
+                    Container(
+                      margin: EdgeInsets.only(left: 36, right: 36),
+                      height: 1,
                       color: Colors.lightBlue,
-                      textColor: Colors.white,
-                      splashColor: Colors.grey,
-                      child: Text(" 上一设备 "),
-                      onPressed: () {
-                        preTask(2);
-                      },
                     ),
-                    RaisedButton(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
+                  ],
+                ),
+                buildRiss(),
+                Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(left: 36, right: 36),
+                      height: 1,
                       color: Colors.lightBlue,
-                      textColor: Colors.white,
-                      splashColor: Colors.grey,
-                      child: Text(" 下一设备 "),
-                      onPressed: () {
-                        nextTask(2);
-                      },
                     ),
-                    RaisedButton(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      color: Colors.lightBlue,
-                      textColor: Colors.white,
-                      splashColor: Colors.grey,
-                      child: Text(" 校验数据 "),
-                      onPressed: () {
-                        checkTaskPaperIsComplete();
-                      },
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ButtonBar(
+                      children: [
+                        RaisedButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          color: Colors.lightBlue,
+                          textColor: Colors.white,
+                          splashColor: Colors.grey,
+                          child: Text(" 上一设备 "),
+                          onPressed: () {
+                            preTask(2);
+                          },
+                        ),
+                        RaisedButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          color: Colors.lightBlue,
+                          textColor: Colors.white,
+                          splashColor: Colors.grey,
+                          child: Text(" 下一设备 "),
+                          onPressed: () {
+                            nextTask(2);
+                          },
+                        ),
+                        RaisedButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          color: Colors.lightBlue,
+                          textColor: Colors.white,
+                          splashColor: Colors.grey,
+                          child: Text(" 校验数据 "),
+                          onPressed: () {
+                            checkTaskPaperIsComplete();
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -264,8 +276,8 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
           element.isChecked = false;
         });
         mTaskSelects[mTaskPosition].isChecked = true;
-        await initPaperData();
-        await initEquipmentData();
+        await initPaperData(0);
+        await initEquipmentData(0);
         await initRissData();
         break;
       case 1:
@@ -274,7 +286,7 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
           element.isChecked = false;
         });
         mPaperSelects[mPaperPosition].isChecked = true;
-        await initEquipmentData();
+        await initEquipmentData(0);
         await initRissData();
         break;
       case 2:
@@ -289,6 +301,16 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
   }
 
   initTaskData() async {
+
+    Map<dynamic,dynamic> modelWithKey = StorageUtils.getModelWithKey("currentCheckInfo");
+    if(modelWithKey != null){
+      mCheckInfo = CurrentCheckInfo.fromJson(modelWithKey);
+      if(widget.task.xtm==mCheckInfo.taskXtm){
+        mPaperPosition = mCheckInfo.paperPosition;
+        mEquPosition = mCheckInfo.equipmentPosition;
+      }
+    }
+
     TaskProvider taskProvider = TaskProvider();
     mTaskList = await taskProvider.getAllTask();
     mTaskList.forEach((element) {
@@ -301,13 +323,13 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
       mTaskSelects.add(selects);
     });
     mTaskSelects[mTaskPosition].isChecked = true;
-    await initPaperData();
-    await initEquipmentData();
+    await initPaperData(mPaperPosition);
+    await initEquipmentData(mEquPosition);
     await initRissData();
     setState(() {});
   }
 
-  initPaperData() async {
+  initPaperData(int position) async {
     mPaperSelects.clear();
     mPaperList.clear();
     PaperProvider paperProvider = PaperProvider();
@@ -320,13 +342,13 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
       mPaperSelects.add(selects);
     });
     if (mPaperSelects.length > 0) {
-      mPaperPosition = 0;
+      mPaperPosition = position;
       mPaperSelects[mPaperPosition].isChecked = true;
     }
     setState(() {});
   }
 
-  initEquipmentData() async {
+  initEquipmentData(int position) async {
     mEquipmentList.clear();
     mEquipmentSelects.clear();
     EquipmentProvider equipmentProvider = EquipmentProvider();
@@ -340,7 +362,7 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
         mEquipmentSelects.add(selects);
       });
       if (mEquipmentSelects.length > 0) {
-        mEquPosition = 0;
+        mEquPosition = position;
         mEquipmentSelects[mEquPosition].isChecked = true;
       }
     }
@@ -368,8 +390,8 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
             element.isChecked = false;
           });
           mTaskSelects[mTaskPosition].isChecked = true;
-          await initPaperData();
-          await initEquipmentData();
+          await initPaperData(0);
+          await initEquipmentData(0);
           await initRissData();
         } else {
           CommUtils.showDialog(context, "提示", "已经最后一个任务", false,
@@ -383,7 +405,7 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
             element.isChecked = false;
           });
           mPaperSelects[mPaperPosition].isChecked = true;
-          await initEquipmentData();
+          await initEquipmentData(0);
           await initRissData();
         } else {
           CommUtils.showDialog(context, "提示", "已经最后一个任务清单", false,
@@ -416,8 +438,8 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
             element.isChecked = false;
           });
           mTaskSelects[mTaskPosition].isChecked = true;
-          await initPaperData();
-          await initEquipmentData();
+          await initPaperData(0);
+          await initEquipmentData(0);
           await initRissData();
         } else {
           CommUtils.showDialog(context, "提示", "已经第一个任务", false,
@@ -431,7 +453,7 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
             element.isChecked = false;
           });
           mPaperSelects[mPaperPosition].isChecked = true;
-          await initEquipmentData();
+          await initEquipmentData(0);
           await initRissData();
         } else {
           CommUtils.showDialog(context, "提示", "已经第一个任务清单", false,
@@ -533,5 +555,13 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
     super.didPopNext();
     // 当从其他页面返回当前页面时出发此方法
     await initRissData();
+  }
+
+  saveCurrentCheckInfo() async{
+    CurrentCheckInfo currentCheckInfo = CurrentCheckInfo();
+    currentCheckInfo.taskXtm=mTaskList[mTaskPosition].xtm;
+    currentCheckInfo.paperPosition=mPaperPosition;
+    currentCheckInfo.equipmentPosition=mEquPosition;
+    await StorageUtils.saveModel("currentCheckInfo", currentCheckInfo);
   }
 }
