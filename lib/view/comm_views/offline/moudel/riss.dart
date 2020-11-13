@@ -197,9 +197,9 @@ class RissProvider extends BaseDbProvider{
   }
 
   //删除数据
-  Future<int> deleteRissById(int id) async {
+  Future<int> deleteRissByTaskId(String taskId) async {
     var db = await getDataBase();
-    var result = await db.rawDelete("DELETE FROM $name WHERE $columnId = '$id'");
+    var result = await db.rawDelete("DELETE FROM $name WHERE $columnRwxtm = '$taskId'");
     return result;
   }
 

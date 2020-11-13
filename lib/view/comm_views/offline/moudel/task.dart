@@ -101,9 +101,12 @@ class TaskProvider extends BaseDbProvider{
 
   //根据id查询
   Future<Task> getTaskById(String id) async {
-    var noteMapList = await selectTaskById(id); // Get 'Map List' from database
-    var user = Task.fromJson(noteMapList[id]);
-    return user;
+    Task task;
+    List<Map<String,dynamic>> noteMapList = await selectTaskById(id); // Get 'Map List' from database
+    if(noteMapList.length>0){
+      task = Task.fromJson(noteMapList[0]);
+    }
+    return task;
   }
 
   //增加数据
@@ -135,9 +138,9 @@ class TaskProvider extends BaseDbProvider{
   }
 
   //删除数据
-  Future<int> deleteTaskById(int id) async {
+  Future<int> deleteTaskById(String id) async {
     var db = await getDataBase();
-    var result = await db.rawDelete('DELETE FROM $name WHERE $columnId = $id');
+    var result = await db.rawDelete("DELETE FROM $name WHERE $columnId = '$id'");
     return result;
   }
 

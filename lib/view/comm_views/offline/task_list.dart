@@ -5,9 +5,12 @@ import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/moudel/page_info.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/equipment.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/page_status.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/paper.dart';
 import 'package:flutter_dev/view/comm_views/offline/task_detail.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../../../main.dart';
@@ -29,14 +32,17 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
   List<Task> mData;
   double isDownloadComp;
   String complementText = "";
+  List<String> complementTextList = List();
+  LoginUser mLoginUser = LoginUser();
+  PageStatus pageStatus = PageStatus.loading;
 
   @override
   void initState() {
+    super.initState();
     mData = List();
     pageInfo.pageNumber = 1;
     pageInfo.pageSize = 10;
     initData();
-    super.initState();
   }
 
   @override
@@ -84,72 +90,150 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
   }
 
   buildBody() {
-    return mData.length > 0
-        ? ListView.builder(
-            itemCount: mData.length,
-            padding: EdgeInsets.all(0),
-            itemBuilder: (context, index) {
-              return buildListItem(index);
-            })
-        : PageLoading();
+    if(pageStatus == PageStatus.loading){
+      return PageLoading();
+    }else if(pageStatus == PageStatus.showData){
+      return ListView.builder(
+          itemCount: mData.length,
+          padding: EdgeInsets.all(0),
+          itemBuilder: (context, index) {
+            return buildListItem(index);
+          });
+    }else{
+      return Container(
+        child: Center(
+          child: Text("暂无数据"),
+        ),
+      );
+    }
+
   }
 
   buildListItem(int index) {
-    return Card(
-      elevation: 0.0,
-      child: InkWell(
-        onTap: () {
-          RouteUtils.pushPage(context, TaskDetailPage(mData[index]));
-        },
-        child: Container(
-          height: 80,
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 6,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      mData[index].description,
-                      style: TextStyle(fontSize: 16, color: Colors.black),
+    if(mLoginUser.issysadmin == '1'){
+      return Slidable(
+        actionPane: SlidableStrechActionPane(),//滑出选项的面板 动画
+        actionExtentRatio: 0.25,
+        secondaryActions: <Widget>[//右侧按钮列表
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: IconSlideAction(
+              caption: 'Delete',
+              color: Colors.red,
+              icon: Icons.delete,
+              closeOnTap: true,
+              onTap: (){
+                deleteTask(index);
+              },
+            ),
+          ),
+        ],
+        child: Card(
+          elevation: 0.0,
+          child: InkWell(
+            onTap: () {
+              RouteUtils.pushPage(context, TaskDetailPage(mData[index]));
+            },
+            child: Container(
+              height: 80,
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 6,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          mData[index].description,
+                          style: TextStyle(fontSize: 16, color: Colors.black),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(
+                    width: 8.0,
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      complementTextList[index],
+                      style: TextStyle(color: Colors.lightBlue, fontSize: 16),
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(
-                width: 8.0,
-              ),
-              Expanded(
-                flex: 2,
-                child: Text(
-                  complementText,
-                  style: TextStyle(color: Colors.lightBlue, fontSize: 16),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }else{
+      return Card(
+        elevation: 0.0,
+        child: InkWell(
+          onTap: () {
+            RouteUtils.pushPage(context, TaskDetailPage(mData[index]));
+          },
+          child: Container(
+            height: 80,
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        mData[index].description,
+                        style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 8.0,
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    complementTextList[index],
+                    style: TextStyle(color: Colors.lightBlue, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
   }
 
   initData() async {
     mData.clear();
+    complementTextList.clear();
+    mLoginUser = LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
     TaskProvider taskProvider = TaskProvider();
     List<Task> tasks = await taskProvider.getAllTask();
     if (tasks.length == 0) {
-      CommUtils.showDialog(context, "提示", "暂无数据，请先下载任务", true, okOnPress: () {
-        Navigator.of(context).pop();
-      });
+//      CommUtils.showDialog(context, "提示", "暂无数据，请先下载任务", true, okOnPress: () {
+//        Navigator.of(context).pop();
+//      });
+      pageStatus=PageStatus.noThing;
+    }else{
+      pageStatus=PageStatus.showData;
     }
-    bool isComplement = true;
-    bool isComplementPart = false; // 部分完成
+
     for(int i = 0; i < tasks.length; i++){
+      bool isComplement = true;
+      bool isComplementPart = false; // 部分完成
       RissProvider rissProvider = RissProvider();
       List<Riss> rissList = await rissProvider.getRissByTaskId(tasks[i].xtm);
       for(int j = 0; j < rissList.length; j++){
@@ -169,9 +253,9 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
       }else if(!isComplement && !isComplementPart){
         complementText = '未完成';
       }
+      complementTextList.add(complementText);
       mData.add(tasks[i]);
     }
-
     setState(() {});
   }
 
@@ -203,5 +287,20 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
     super.didPopNext();
     // 当从其他页面返回当前页面时出发此方法
     await initData();
+  }
+
+  deleteTask(int index) async{
+    await CommUtils.showDialog(context, "提示", "确认删除该任务数据吗？", true,okOnPress: (){
+      TaskProvider taskProvider = TaskProvider();
+      taskProvider.deleteTaskById(mData[index].xtm);
+      PaperProvider paperProvider = PaperProvider();
+      paperProvider.deletePaperByTaskId(mData[index].xtm);
+      EquipmentProvider equipmentProvider = EquipmentProvider();
+      equipmentProvider.deleteEquipmentByTaskId(mData[index].xtm);
+      RissProvider rissProvider = RissProvider();
+      rissProvider.deleteRissByTaskId(mData[index].xtm);
+      initData();
+    },cancelOnPress: (){});
+
   }
 }

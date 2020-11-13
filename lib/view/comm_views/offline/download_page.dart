@@ -17,6 +17,7 @@ import 'package:flutter_dev/view/comm_views/offline/moudel/equipment.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/paper.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -112,61 +113,69 @@ class DownloadPageState extends State<DownloadPage> {
   }
 
   buildListItem(int index) {
-    return Card(
-      elevation: 0.0,
-      child: InkWell(
-        onTap: () {},
-        child: Container(
-          height: 100,
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 6,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      mData[index].description,
-                      style: TextStyle(fontSize: 16, color: Colors.black),
-                    ),
-                    Text("状态:    ${mData[index].comp == "1" ? "已完成" : "未完成"}",
-                        style:
-                            TextStyle(fontSize: 16, color: Colors.grey[600])),
-                  ],
+    return Slidable(
+      actionPane: SlidableStrechActionPane(),//滑出选项的面板 动画
+      actionExtentRatio: 0.25,
+      secondaryActions: <Widget>[//右侧按钮列表
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: IconSlideAction(
+            caption: '下载',
+            color: Colors.lightBlue,
+            icon: Icons.file_download,
+            onTap: () {
+              checkTaskIsDownloaded(mData[index].xtm);
+            },
+          ),
+        ),
+      ],
+      child: Card(
+        elevation: 0.0,
+        child: InkWell(
+          onTap: () {},
+          child: Container(
+            height: 100,
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        mData[index].description,
+                        style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                      Text("状态:    ${mData[index].comp == "1" ? "已完成" : "未完成"}",
+                          style:
+                              TextStyle(fontSize: 16, color: Colors.grey[600])),
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: 8.0,
-              ),
-              Expanded(
-                flex: 2,
-                child: RaisedButton(
-                  color: Colors.lightBlue[200],
-                  onPressed: () {
-//                    isDownloadComp = null;
-                    showDialog(
-                        context: context,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            backgroundColor: Colors.lightBlue,
-                            value: isDownloadComp,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                          ),
-                        ));
-                    onDownloadTask(mData[index].xtm);
-                  },
-                  child: Container(
-                      child: Text(
-                    "下载",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  )),
-                ),
-              ),
-            ],
+//                SizedBox(
+//                  width: 8.0,
+//                ),
+//                Expanded(
+//                  flex: 2,
+//                  child: RaisedButton(
+//                    color: Colors.lightBlue[200],
+//                    onPressed: () async{
+//                      checkTaskIsDownloaded(mData[index].xtm);
+//
+//                    },
+//                    child: Container(
+//                        child: Text(
+//                      "下载",
+//                      style: TextStyle(fontSize: 16, color: Colors.white),
+//                    )),
+//                  ),
+//                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -202,6 +211,16 @@ class DownloadPageState extends State<DownloadPage> {
   }
 
   onDownloadTask(String taskXtm) async {
+    showDialog(
+        context: context,
+        child: Center(
+          child: CircularProgressIndicator(
+            backgroundColor: Colors.lightBlue,
+            value: isDownloadComp,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+          ),
+        ));
+
     var baseMap = DataHelper.getBaseMap();
     baseMap.clear();
     baseMap['taskXtm'] = taskXtm;
@@ -265,5 +284,19 @@ class DownloadPageState extends State<DownloadPage> {
     await initData();
     mRefreshController.refreshCompleted();
     mRefreshController.loadComplete();
+  }
+
+  checkTaskIsDownloaded(String taskXtm) async{
+    TaskProvider taskProvider = TaskProvider();
+    Task task = await taskProvider.getTaskById(taskXtm);
+    if(task!=null){
+      CommUtils.showDialog(context, "提示", "该任务已存在，再次下载将会更新本地数据，是否继续？", true,okOnPress: (){
+        onDownloadTask(taskXtm);
+      },cancelOnPress: (){
+
+      });
+    }else{
+      onDownloadTask(taskXtm);
+    }
   }
 }

@@ -52,4 +52,21 @@ class CommUtils {
     return await permission.request();
   }
 
+
+  ///取小数点后几位
+  ///num 数据
+  ///location 几位
+  static String formatNum(double num, int location) {
+    if ((num.toString().length - num.toString().lastIndexOf(".") - 1) <
+        location) {
+      //小数点后有几位小数
+      return num.toStringAsFixed(location)
+          .substring(0, num.toString().lastIndexOf(".") + location + 1)
+          .toString();
+    } else {
+      return num.toString()
+          .substring(0, num.toString().lastIndexOf(".") + location + 1)
+          .toString();
+    }
+  }
 }

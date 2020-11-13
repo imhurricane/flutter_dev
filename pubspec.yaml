@@ -89,6 +89,8 @@ dependencies:
   device_info : ^0.4.2
   signature: ^2.0.0   #签名
   permission_handler: ^5.0.1+1
+  # 列表左右滑出按钮
+  flutter_slidable: ^0.5.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -60,7 +60,7 @@ class UploadTaskPageState extends State<UploadTaskPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "任务数据上传:    "+ (mUploadCount>0?(progressValue * 100).toString()+"%":"0/"+mTotalCount.toString()).toString(),
+              "任务数据上传:    "+ (mUploadCount>0?CommUtils.formatNum(progressValue * 100,2)+"%":"0/"+mTotalCount.toString()).toString(),
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(
@@ -154,15 +154,15 @@ class UploadTaskPageState extends State<UploadTaskPage> {
           element.isUpload=true;
         });
         await rissProvider.update(riss, false);
+        if(mUploadCount<mTotalCount){
+          mUploadCount++;
+          String formatNum = CommUtils.formatNum(mUploadCount/mTotalCount, 4);
+          progressValue = double.parse(formatNum);
+        }
+        mButtonStr = "重新上传";
 
         setState(() {
-          if(mUploadCount<mTotalCount){
-            mUploadCount++;
-            String str = (mUploadCount/mTotalCount).toString();
-            str = str.substring(0,str.length>6?6:str.length);
-            progressValue = double.parse(str);
-          }
-          mButtonStr = "重新上传";
+
         });
       }
     }
