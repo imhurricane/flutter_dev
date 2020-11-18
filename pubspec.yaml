@@ -3,6 +3,7 @@ description: A new Flutter application.
 
 publish_to: 'none'
 
+#  flutter build apk --build-name=1.00.02 --build-number=3
 version: 1.0.0+1
 
 environment:
@@ -84,13 +85,15 @@ dependencies:
   # 源码已修改  升级请谨慎  去掉了下划线
   multiple_select: 0.1.23
   # 加载loading
-  flutter_spinkit: "^4.1.2"
+  flutter_spinkit: ^4.1.2
   # 获取手机信息
   device_info : ^0.4.2
   signature: ^2.0.0   #签名
   permission_handler: ^5.0.1+1
   # 列表左右滑出按钮
   flutter_slidable: ^0.5.4
+  # app 升级
+  flutter_app_upgrade: ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

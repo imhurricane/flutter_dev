@@ -72,8 +72,8 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
           body: Container(
             color: Colors.grey[200],
             child: SmartRefresher(
-              enablePullDown: true,
-              enablePullUp: false,
+//              enablePullDown: true,
+              enablePullUp: true,
               header: WaterDropHeader(
                 waterDropColor: Colors.blue,
               ),
@@ -217,20 +217,17 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
   }
 
   initData() async {
-    mData.clear();
-    complementTextList.clear();
+
     mLoginUser = LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
     TaskProvider taskProvider = TaskProvider();
-    List<Task> tasks = await taskProvider.getAllTask();
+    List<Task> tasks  = await taskProvider.getTaskByLimit(pageInfo.pageSize, pageInfo.pageNumber);
+    print('tasks.length:'+tasks.length.toString());
     if (tasks.length == 0) {
-//      CommUtils.showDialog(context, "提示", "暂无数据，请先下载任务", true, okOnPress: () {
-//        Navigator.of(context).pop();
-//      });
-      pageStatus=PageStatus.noThing;
+      mRefreshController.loadComplete();
+      mRefreshController.loadNoData();
     }else{
-      pageStatus=PageStatus.showData;
+      mRefreshController.loadComplete();
     }
-
     for(int i = 0; i < tasks.length; i++){
       bool isComplement = true;
       bool isComplementPart = false; // 部分完成
@@ -256,16 +253,23 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
       complementTextList.add(complementText);
       mData.add(tasks[i]);
     }
+    if (mData.length == 0) {
+      pageStatus=PageStatus.noThing;
+    }else{
+      pageStatus=PageStatus.showData;
+    }
     setState(() {});
   }
 
   onLoading() async {
+    pageInfo.pageNumber++;
     await initData();
-    mRefreshController.loadComplete();
   }
 
   onRefresh() async {
     mData.clear();
+    complementTextList.clear();
+    pageInfo.pageNumber=1;
     await initData();
     mRefreshController.refreshCompleted();
     mRefreshController.loadComplete();

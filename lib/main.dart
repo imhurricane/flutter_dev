@@ -9,7 +9,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await SpUtil.getInstance();

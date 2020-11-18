@@ -55,6 +55,7 @@ class TaskProvider extends BaseDbProvider{
   final String columnComp = "comp";
   final String columnDeptXtm = "deptxtm";
   final String columnTaskDate = "taskdate";
+  final String columnTaskDate1 = "taskdate1";
   final String columnDesc = "description";
 
   @override
@@ -74,6 +75,28 @@ class TaskProvider extends BaseDbProvider{
       ''';
   }
 
+  @override
+  tableUpdate() {
+    return true;
+  }
+
+  @override
+  tableUpdateString(){
+    List<String> sqlList = List();
+    String sql0 = "ALTER TABLE $name RENAME TO $name"+"_old";
+    String sql1 = createTableString();
+    String sql2 = 'INSERT INTO "$name" '
+        ' ($columnId,$columnComp,$columnDeptXtm,$columnTaskDate,$columnDesc) '
+        ' SELECT $columnId,$columnComp,$columnDeptXtm,$columnTaskDate,$columnDesc '
+        ' FROM $name'+'_old';
+    String sql3 = "DROP TABLE $name"+"_old";
+    sqlList.add(sql0);
+    sqlList.add(sql1);
+    sqlList.add(sql2);
+    sqlList.add(sql3);
+    return sqlList;
+  }
+
   ///查询数据
   Future selectTaskById(String id) async {
     Database db = await getDataBase();
@@ -87,9 +110,27 @@ class TaskProvider extends BaseDbProvider{
     return result;
   }
 
+  //查询数据库所有
+  Future<List<Map<String, dynamic>>> selectByLimit(int pageSize,int pageNumber) async {
+    var db = await getDataBase();
+    var result = await db.query(name,orderBy: "taskdate desc",limit: pageSize,offset: pageSize * (pageNumber-1));
+    return result;
+  }
+
   //获取数据库里所有
   Future<List<Task>> getAllTask() async{
     var mapList = await selectMapList();
+    var count  = mapList.length;
+    List<Task> list= List<Task>();
+
+    for(int i=0;i<count;i++){
+      list.add(Task.fromJson(mapList[i]));
+    }
+    return list;
+  }
+  //获取数据库里指定条数数据
+  Future<List<Task>> getTaskByLimit(int pageSize,int pageNumber) async{
+    var mapList = await selectByLimit(pageSize,pageNumber);
     var count  = mapList.length;
     List<Task> list= List<Task>();
 

@@ -145,4 +145,10 @@ class PaperProvider extends BaseDbProvider {
     var result = await db.rawDelete("DELETE FROM $name WHERE $columnParentxtm = '$taskId'");
     return result;
   }
+
+  @override
+  tableUpdate() {
+    return false;
+  }
+
 }

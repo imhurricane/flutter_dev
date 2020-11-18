@@ -7,6 +7,7 @@ class Address {
   static const String BASE_PACKAGE = "/appservlet/?requestdir=app.base.http&requesttype=";
   static const String OFFLINE_PACKAGE = "/appservlet/?requestdir=app.offline&requesttype=";
   static String LOGIN_URL = BASE_URL + "/appservlet/?requesttype=login";
+  static String CheckVersion_URL = BASE_URL + "/appservlet/?requesttype=updateappversion&platform=Android";
   static const String HOME_URL = BASE_PACKAGE + "MainMenuServlet";
   static const String DownloadTaskList_URL = OFFLINE_PACKAGE + "DownloadTaskListServlet";
   static const String DownloadTask_URL = OFFLINE_PACKAGE + "DownloadTaskServlet";
@@ -22,6 +23,7 @@ class Address {
   static setBaseUrl(baseUrl){
     BASE_URL = baseUrl;
     LOGIN_URL = BASE_URL + "/appservlet/?requesttype=login";
+    CheckVersion_URL = BASE_URL + "/appservlet/?requesttype=updateappversion&platform=Android";
     BaseImageURL = BASE_URL + "/app/images/";
     DetailPageIconUrl = BASE_URL + "/attachfileuploadservlet/?requesttype=sig";
   }

@@ -94,6 +94,11 @@ class EntryModelProvider extends BaseDbProvider {
       ''';
   }
 
+  @override
+  tableUpdate() {
+    return false;
+  }
+
   ///查询数据
   Future selectUser(int id) async {
     Database db = await getDataBase();

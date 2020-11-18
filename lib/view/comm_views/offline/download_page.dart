@@ -123,6 +123,7 @@ class DownloadPageState extends State<DownloadPage> {
             caption: '下载',
             color: Colors.lightBlue,
             icon: Icons.file_download,
+            closeOnTap: true,
             onTap: () {
               checkTaskIsDownloaded(mData[index].xtm);
             },

@@ -197,4 +197,8 @@ class EquipmentProvider extends BaseDbProvider{
     return result;
   }
 
+  @override
+  tableUpdate() {
+    return false;
+  }
 }

@@ -130,6 +130,11 @@ class RissCompleteProvider extends BaseDbProvider{
       ''';
   }
 
+  @override
+  tableUpdate() {
+    return false;
+  }
+
   ///查询数据
   Future selectRissById(String id) async {
     Database db = await getDataBase();
