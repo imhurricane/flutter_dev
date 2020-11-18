@@ -6,7 +6,7 @@ import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/form_select_cell.dart';
 import 'package:flutter_dev/view/login/login_page.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_dev/view/main/mine/about_page.dart';
 
 import 'mine_item.dart';
 
@@ -105,6 +105,9 @@ class MainMinePageState extends State<MainMinePage> {
                     case ButtonType.loginOut:
                       loginOut(index);
                       break;
+                    case ButtonType.aboutAs:
+                      RouteUtils.pushPage(context, AboutPage());
+                      break;
                     default:
                       break;
                   }
@@ -131,6 +134,11 @@ class MainMinePageState extends State<MainMinePage> {
     mineItem.description = "退出登录";
     mineItem.icon = Icons.settings_power;
     mineItem.iconColor = Colors.red[300];
+    MineItem mineItem1 = MineItem(type: ButtonType.aboutAs);
+    mineItem1.description = "关于我们";
+    mineItem1.icon = Icons.info;
+    mineItem1.iconColor = Colors.lightBlue[400];
     items.add(mineItem);
+    items.add(mineItem1);
   }
 }

@@ -18,4 +18,5 @@ class MineItem{
 
 enum ButtonType {
   loginOut,
+  aboutAs
 }
