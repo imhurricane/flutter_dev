@@ -502,6 +502,7 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
   }
 
   checkTaskPaperIsComplete() async{
+    if(mPaperList.length>0){
       EquipmentProvider equipmentProvider = EquipmentProvider();
       List<Equipment> equipmentList = await equipmentProvider.getEquipmentByParentId(mPaperList[mPaperPosition].xtm);
 
@@ -530,9 +531,12 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
         CommUtils.showDialog(context, "提示", "当前任务清单已完成", false,okOnPress: (){});
       }else{
         CommUtils.showDialog(context, "提示", "当前任务清单未完成，请前往查看", false,okOnPress: (){
-        jumpEquipment(noCompleteEquPosition);
+          jumpEquipment(noCompleteEquPosition);
         });
       }
+    }else{
+      CommUtils.showDialog(context, "提示", "暂无可检查数据！", false,okOnPress: (){});
+    }
   }
 
   // 跳转到未完成的设备

@@ -55,7 +55,6 @@ class TaskProvider extends BaseDbProvider{
   final String columnComp = "comp";
   final String columnDeptXtm = "deptxtm";
   final String columnTaskDate = "taskdate";
-  final String columnTaskDate1 = "taskdate1";
   final String columnDesc = "description";
 
   @override
@@ -77,7 +76,7 @@ class TaskProvider extends BaseDbProvider{
 
   @override
   tableUpdate() {
-    return true;
+    return false;
   }
 
   @override

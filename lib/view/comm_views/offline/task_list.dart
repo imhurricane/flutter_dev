@@ -217,7 +217,6 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
   }
 
   initData() async {
-
     mLoginUser = LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
     TaskProvider taskProvider = TaskProvider();
     List<Task> tasks  = await taskProvider.getTaskByLimit(pageInfo.pageSize, pageInfo.pageNumber);
@@ -290,6 +289,9 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
   void didPopNext() async{
     super.didPopNext();
     // 当从其他页面返回当前页面时出发此方法
+    mData.clear();
+    complementTextList.clear();
+    pageInfo.pageNumber=1;
     await initData();
   }
 

@@ -90,6 +90,12 @@ class FormInputCell extends StatefulWidget {
 }
 
 class _FormInputCellState extends State<FormInputCell> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
 

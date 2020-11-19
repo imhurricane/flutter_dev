@@ -104,7 +104,6 @@ class PaperProvider extends BaseDbProvider {
   Future selectPaperByParentId(String parentId) async {
     Database db = await getDataBase();
     String sql = "select * from $name where $columnParentxtm = '$parentId' ";
-    print('sql:'+sql);
     return await db.rawQuery(sql);
   }
 

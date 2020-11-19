@@ -11,14 +11,12 @@ import 'package:flutter_dev/http/data_helper.dart';
 import 'package:flutter_dev/http/http_manager.dart';
 import 'package:flutter_dev/http/result_data.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
-import 'package:flutter_dev/view/comm_views/components/progress.dart';
 import 'package:flutter_dev/view/comm_views/moudel/page_info.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/equipment.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/paper.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'moudel/task.dart';

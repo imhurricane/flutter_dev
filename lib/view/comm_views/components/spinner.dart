@@ -111,7 +111,7 @@ class _FromSpinnerSearchState extends State<FromSpinnerSearch> {
     return Container(
       alignment: Alignment.center,
 //      padding: EdgeInsets.only(right: -10),
-      child: Text(item?.desc==null?"":item?.desc,maxLines: 1,),
+      child: Text(item?.desc==null?"":item?.desc,maxLines: 1,style: TextStyle(fontSize: 17),),
     );
   }
 

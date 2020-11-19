@@ -19,6 +19,7 @@ import 'package:flutter_dev/view/comm_views/moudel/detail_info.dart';
 import 'package:flutter_dev/view/comm_views/offline/download_page.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss_complete.dart';
 import 'package:flutter_dev/view/comm_views/offline/task_list.dart';
+import 'package:flutter_dev/view/comm_views/offline/task_statistics.dart';
 import 'package:flutter_dev/view/comm_views/offline/task_upload.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
 import 'package:flutter_dev/view/main/home/grid_item.dart';
@@ -235,7 +236,7 @@ class HomeItemPageState extends State<HomeItemPage> with RouteAware{
                       } else if (entryModels[index].id == "task_upload") {
                         RouteUtils.pushPage(context, UploadTaskPage());
                       } else if (entryModels[index].id == "task_statistics") {
-                        print('任务统计');
+                        RouteUtils.pushPage(context, StatisticsPage());
                       }
                     }
                   },
