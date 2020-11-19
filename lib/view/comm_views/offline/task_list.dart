@@ -58,7 +58,7 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
             return [
               SliverAppBar(
                 pinned: true,
-                title: Text("任务清单"),
+                title: Text("任务列表"),
                 centerTitle: true,
                 leading: IconButton(
                   onPressed: () {
@@ -220,7 +220,6 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
     mLoginUser = LoginUser.fromJson(StorageUtils.getModelWithKey("userInfo"));
     TaskProvider taskProvider = TaskProvider();
     List<Task> tasks  = await taskProvider.getTaskByLimit(pageInfo.pageSize, pageInfo.pageNumber);
-    print('tasks.length:'+tasks.length.toString());
     if (tasks.length == 0) {
       mRefreshController.loadComplete();
       mRefreshController.loadNoData();

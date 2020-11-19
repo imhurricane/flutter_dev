@@ -66,16 +66,6 @@ class DownloadPageState extends State<DownloadPage> {
                   },
                   icon: Icon(Icons.arrow_back_ios),
                 ),
-//                actions: [
-//                  IconButton(
-////                  padding: EdgeInsets.only(right: 20),
-//                    icon: Icon(
-//                      Icons.menu,
-//                      color: Colors.white,
-//                    ),
-//                    onPressed: () {},
-//                  ),
-//                ],
               ),
             ];
           },
@@ -118,9 +108,15 @@ class DownloadPageState extends State<DownloadPage> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
           child: IconSlideAction(
-            caption: '下载',
+            iconWidget: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.file_download,color: Colors.white,),
+                Text("下载",style: TextStyle(color: Colors.white),),
+              ],
+            ),
             color: Colors.lightBlue,
-            icon: Icons.file_download,
             closeOnTap: true,
             onTap: () {
               checkTaskIsDownloaded(mData[index].xtm);

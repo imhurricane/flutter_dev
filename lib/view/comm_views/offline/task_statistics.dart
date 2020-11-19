@@ -279,6 +279,8 @@ class StatisticsPageState extends State<StatisticsPage>  with RouteAware{
         onPressed: (){
           RouteUtils.pushPage(context, TaskDetailPage(mTaskList[mPosition]));
         },
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6.0)),
         color: Colors.lightBlue,
         child: Text("前往任务排查",style: TextStyle(color: Colors.white),),
       ),
