@@ -227,26 +227,39 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
       mRefreshController.loadComplete();
     }
     for(int i = 0; i < tasks.length; i++){
-      bool isComplement = true;
-      bool isComplementPart = false; // 部分完成
+      int mPaperTotalCount = 0;
+      int mPaperComplementCount = 0;
+      PaperProvider paperProvider = PaperProvider();
+      EquipmentProvider equipmentProvider = EquipmentProvider();
       RissProvider rissProvider = RissProvider();
-      List<Riss> rissList = await rissProvider.getRissByTaskId(tasks[i].xtm);
-      for(int j = 0; j < rissList.length; j++){
-        Riss riss = rissList[j];
-        if ((riss.havemesure == null || riss.havemesure == '0') &&
-            (riss.activemesure == null || riss.activemesure == '0') &&
-            (riss.inactivemesure == null || riss.inactivemesure == '0')) {
-          isComplement = false;
-        }else{
-          isComplementPart = true;
+      List<Paper> paperList =
+      await paperProvider.getPaperByParentId(tasks[i].xtm);
+      mPaperTotalCount = paperList.length;
+      for(int i=0;i<paperList.length;i++){
+        List<Equipment> equList = await equipmentProvider.getEquipmentByParentId(paperList[i].xtm);
+        int equipmentComplementCount = 0;
+        for(int j=0;j<equList.length;j++){
+          List<Riss> rissList = await rissProvider.getRissByParentId(equList[j].xtm);
+          int rissComplementCount = 0;
+          rissList.forEach((element) {
+            if(element.inactivemesure == "1" || element.activemesure == "1" || element.havemesure == "1"){
+              rissComplementCount++;
+            }
+          });
+          if(rissComplementCount == rissList.length){
+            equipmentComplementCount++;
+          }
+        }
+        if(equipmentComplementCount == equList.length){
+          mPaperComplementCount++;
         }
       }
-      if (isComplement) {
-        complementText = '已完成';
-      } else if(!isComplement && isComplementPart){
-        complementText = '部分完成';
-      }else if(!isComplement && !isComplementPart){
-        complementText = '未完成';
+      if(mPaperComplementCount == mPaperTotalCount){
+        complementText = "已完成";
+      }else if(mPaperComplementCount > 0){
+        complementText = "部分完成";
+      }else{
+        complementText = "未完成";
       }
       complementTextList.add(complementText);
       mData.add(tasks[i]);
@@ -304,7 +317,10 @@ class TaskListPageState extends State<TaskListPage> with RouteAware{
       equipmentProvider.deleteEquipmentByTaskId(mData[index].xtm);
       RissProvider rissProvider = RissProvider();
       rissProvider.deleteRissByTaskId(mData[index].xtm);
-      initData();
+      mData.removeAt(index);
+      setState(() {
+
+      });
     },cancelOnPress: (){});
 
   }

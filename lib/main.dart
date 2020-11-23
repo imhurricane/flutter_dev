@@ -44,6 +44,7 @@ class RootAppState extends State<RootApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       navigatorObservers: [RootApp.routeObserver],
       home: IndexPage(),
       builder: (context, widget) {

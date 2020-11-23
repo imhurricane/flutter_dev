@@ -14,7 +14,6 @@ class CommBottomAction {
   static dynamic result;
 
   static action(BuildContext context,int buttonType) async{
-    print("buttonType:"+buttonType.toString());
     switch (buttonType) {
       case 1001:
         break;
@@ -36,7 +35,6 @@ class CommBottomAction {
   static getImageFromCamera() async {
     PickedFile image = await ImagePicker().getImage(source: ImageSource.camera,imageQuality: 50);
     result=image.path;
-    print('result:'+result);
   }
 
   static getImage() async{
@@ -49,7 +47,6 @@ class CommBottomAction {
     if(image != null){
       result = image.path;
     }
-    print('result:'+result);
   }
 
 }

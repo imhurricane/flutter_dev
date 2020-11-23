@@ -19,7 +19,9 @@ class RissComplete {
   String checkData;
   String isUpload;
   String yhXtm;
+  String paperXtm;
   List<RissImages> image;
+  String signImagePath;
 
   RissComplete(
       {this.xtm,
@@ -35,7 +37,9 @@ class RissComplete {
         this.checkData,
         this.isUpload,
         this.yhXtm,
+        this.paperXtm,
         this.image,
+        this.signImagePath,
       });
 
   RissComplete.fromJson(Map<String, dynamic> data) {
@@ -52,6 +56,8 @@ class RissComplete {
     checkData = data['checkData'];
     isUpload = data['isUpload'];
     yhXtm = data['yhXtm'];
+    paperXtm = data['paperXtm'];
+    signImagePath = data['signImagePath'];
     image = List();
     if(data['image']!=null){
       List decode = json.decode(data['image'])==null?List():json.decode(data['image']);
@@ -59,7 +65,6 @@ class RissComplete {
         image.add(RissImages.fromJson(v));
       });
     }
-
   }
 
   Map<String, dynamic> toJson() {
@@ -77,6 +82,8 @@ class RissComplete {
     data['checkData'] = this.checkData;
     data['isUpload'] = this.isUpload;
     data['yhXtm'] = this.yhXtm;
+    data['paperXtm'] = this.paperXtm;
+    data['signImagePath'] = this.signImagePath;
     if (this.image != null) {
       data['image'] = this.image.map((v) => v.toJson()).toList();
     }
@@ -102,7 +109,9 @@ class RissCompleteProvider extends BaseDbProvider{
   final String columnCheckData = "checkData";
   final String columnIsUpload = "isUpload";
   final String columnYhXtm = "yhXtm";
+  final String columnPaperXtm = "paperXtm";
   final String columnImage = "image";
+  final String columnSignImagePath = "signImagePath";
 
   @override
   tableName() {
@@ -126,6 +135,8 @@ class RissCompleteProvider extends BaseDbProvider{
         $columnIsUpload text not null,
         $columnYhXtm text not null,
         $columnImage text,
+        $columnPaperXtm text,
+        $columnSignImagePath text,
         $columnHavemesure text not null)
       ''';
   }
@@ -139,6 +150,11 @@ class RissCompleteProvider extends BaseDbProvider{
   Future selectRissById(String id) async {
     Database db = await getDataBase();
     return await db.rawQuery("select * from $name where $columnId = '$id'");
+  }
+  ///查询数据
+  Future selectRissByPaperId(String id) async {
+    Database db = await getDataBase();
+    return await db.rawQuery("select * from $name where $columnPaperXtm = '$id'");
   }
 
   ///查询数据
@@ -180,6 +196,16 @@ class RissCompleteProvider extends BaseDbProvider{
     }
     return rissComplete;
   }
+  //根据id查询
+  Future<List<RissComplete>> getRissByPaperId(String id) async {
+    List<Map<String,dynamic>> mapList = await selectRissByPaperId(id); // Get 'Map List' from database
+    var count  = mapList.length;
+    List<RissComplete> list= List<RissComplete>();
+    for(int i=0;i<count;i++){
+      list.add(RissComplete.fromJson(mapList[i]));
+    }
+    return list;
+  }
 
   //增加数据
   Future<int> insertRiss(RissComplete riss) async {
@@ -212,15 +238,28 @@ class RissCompleteProvider extends BaseDbProvider{
             "$columnCheckData = ?,"
             "$columnIsUpload = ?,"
             "$columnYhXtm = ?,"
+            "$columnPaperXtm = ?,"
             "$columnImage = ?,"
             "$columnHavemesure = ?"
             " where $columnId= ?",
         [riss.xtm,riss.rwxtm,riss.errdetail,riss.parentxtm,riss.pjjb,riss.riskfactors,
           riss.fxffcs,riss.inactivemesure,riss.activemesure,
-          riss.checkData,riss.isUpload,riss.yhXtm,encode,riss.havemesure,riss.xtm]);
+          riss.checkData,riss.isUpload,riss.yhXtm,riss.paperXtm,encode,riss.havemesure,riss.xtm]);
     return result;
   }
 
+  //更新数据
+  Future<int> updateWithSignImage(RissComplete rissComplete) async {
+    var database = await getDataBase();
+    var result = await database.rawUpdate(
+        "update $name set "
+            "$columnId= ?,"
+            "$columnSignImagePath = ?,"
+            "$columnIsUpload = ?"
+            " where $columnId= ?",
+        [rissComplete.xtm,rissComplete.signImagePath,rissComplete.isUpload,rissComplete.xtm]);
+    return result;
+  }
   //删除数据
   Future<int> deleteRissById(int id) async {
     var db = await getDataBase();

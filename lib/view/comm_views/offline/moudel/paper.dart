@@ -8,13 +8,15 @@ class Paper {
   String parentxtm;
   String description;
   List<Equipment> equipment;
+  bool isSignImage;
 
-  Paper({this.xtm, this.parentxtm, this.description, this.equipment});
+  Paper({this.xtm, this.parentxtm, this.description, this.equipment,this.isSignImage});
 
   Paper.fromJson(Map<String, dynamic> json) {
     xtm = json['xtm'];
     parentxtm = json['parentxtm'];
     description = json['description'];
+    isSignImage = json['isSignImage']=="1"?true:false;
     if (json['equipment'] != null) {
       equipment = new List<Equipment>();
       json['equipment'].forEach((v) {
@@ -28,6 +30,7 @@ class Paper {
     data['xtm'] = this.xtm;
     data['parentxtm'] = this.parentxtm;
     data['description'] = this.description;
+    data['isSignImage'] = this.isSignImage?"1":"0";
     if (this.equipment != null) {
       data['equipment'] = this.equipment.map((v) => v.toJson()).toList();
     }
@@ -42,6 +45,7 @@ class PaperProvider extends BaseDbProvider {
   final String columnId = "xtm";
   final String columnParentxtm = "parentxtm";
   final String columnDesc = "description";
+  final String columnIsSignImage = "isSignImage";
 
   @override
   tableName() {
@@ -54,6 +58,7 @@ class PaperProvider extends BaseDbProvider {
         create table $name (
         $columnId text not null,
         $columnParentxtm text not null,
+        $columnIsSignImage text,
         $columnDesc text not null)
       ''';
   }
@@ -84,12 +89,20 @@ class PaperProvider extends BaseDbProvider {
 
   //根据id查询
   Future<Paper> getPaperById(String id) async {
-    var mapList =
-        await selectPaperById(id); // Get 'Map List' from database
-    var user = Paper.fromJson(mapList[id]);
+    var mapList = await selectPaperById(id); // Get 'Map List' from database
+    var user = Paper.fromJson(mapList[0]);
     return user;
   }
-
+  //根据id查询
+  Future<List<Paper>> getPaperByIsSign(bool isSign) async {
+    List<Map<String,dynamic>> mapList = await selectPaperByIsSign(isSign);
+    var count = mapList.length;
+    List<Paper> list = List<Paper>();
+    for (int i = 0; i < count; i++) {
+      list.add(Paper.fromJson(mapList[i]));
+    }
+    return list;
+  }
   //根据id查询
   Future<List<Paper>> getPaperByParentId(String parentId) async {
     List<Map<String,dynamic>> mapList = await selectPaperByParentId(parentId);
@@ -104,6 +117,12 @@ class PaperProvider extends BaseDbProvider {
   Future selectPaperByParentId(String parentId) async {
     Database db = await getDataBase();
     String sql = "select * from $name where $columnParentxtm = '$parentId' ";
+    return await db.rawQuery(sql);
+  }
+
+  Future selectPaperByIsSign(bool isSIgn) async {
+    Database db = await getDataBase();
+    String sql = "select * from $name where $columnIsSignImage = '${isSIgn?"1":"0"}' ";
     return await db.rawQuery(sql);
   }
 
@@ -128,11 +147,29 @@ class PaperProvider extends BaseDbProvider {
         "$columnId = ?,"
         "$columnParentxtm = ?,"
         "$columnDesc = ?"
+        "$columnIsSignImage = ?"
         " where $columnId= ?",
         [
           paper.xtm,
           paper.parentxtm,
           paper.description,
+          paper.isSignImage,
+          paper.xtm,
+        ]);
+    return result;
+  }
+
+  //更新数据
+  Future<int> updateWithSign(Paper paper) async {
+    var database = await getDataBase();
+    var result = await database.rawUpdate(
+        "update $name set "
+            "$columnId = ?,"
+            "$columnIsSignImage = ?"
+            " where $columnId= ?",
+        [
+          paper.xtm,
+          paper.isSignImage?"1":"0",
           paper.xtm,
         ]);
     return result;

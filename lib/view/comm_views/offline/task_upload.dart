@@ -1,16 +1,15 @@
 import 'dart:convert';
 
-import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dev/comm/comm_utils.dart';
 import 'package:flutter_dev/http/address.dart';
-import 'package:flutter_dev/http/data_helper.dart';
 import 'package:flutter_dev/http/http_manager.dart';
 import 'package:flutter_dev/http/result_data.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/image.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss.dart';
 
+import 'moudel/paper.dart';
 import 'moudel/riss_complete.dart';
 
 class UploadTaskPage extends StatefulWidget {
@@ -129,46 +128,81 @@ class UploadTaskPageState extends State<UploadTaskPage> {
     });
     List<RissComplete> list = mRissCompleteList;
     bool isUploadSuccess = false;
-    for(int i =0;i<list.length;i++){
+    PaperProvider paper = PaperProvider();
+    List<Paper> signPapers = await paper.getPaperByIsSign(true);
+    List<String> complementPaperXtmList = List();
+    for(int i =0;i<list.length;i++) {
       RissComplete rissComplete = list[i];
-      List<RissImages> image = List();
-      rissComplete.image.forEach((element) {
-        image.add(element);
-      });
-      rissComplete.image=null;
-      ResultData result = await HttpManager.getInstance().uploadPictures(Address.UploadTask_URL, rissComplete.toJson(), image);
-      Map<String, dynamic> json = jsonDecode(result.data);
-      if (json['code'] != 200) {
-        isUploadSuccess = false;
-        CommUtils.showDialog(context, "提示", result.data, false, okOnPress: () {});
-        break;
-      } else {
-        isUploadSuccess = true;
-        RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
-        RissComplete rissComplete = await rissCompleteProvider.getRissById(json['data']);
-        rissComplete.isUpload="1";
-        rissCompleteProvider.update(rissComplete);
-        RissProvider rissProvider = RissProvider();
-        Riss riss = await rissProvider.getRissById(json['data']);
-        riss.image.forEach((element) {
-          element.isUpload=true;
-        });
-        await rissProvider.update(riss, false);
-        if(mUploadCount<mTotalCount){
-          mUploadCount++;
-          String formatNum = CommUtils.formatNum(mUploadCount/mTotalCount, 4);
-          progressValue = double.parse(formatNum);
-        }
-        mButtonStr = "重新上传";
-
-        setState(() {
-
-        });
+      if (!complementPaperXtmList.contains(rissComplete.paperXtm)) {
+        complementPaperXtmList.add(rissComplete.paperXtm);
       }
     }
-    if(isUploadSuccess) {
+    for(int j =0;j<signPapers.length;j++){
+        for(int i =0;i<list.length;i++){
+          RissComplete rissComplete = list[i];
+          if(rissComplete.paperXtm != signPapers[j].xtm){
+            continue;
+          }
+          if(complementPaperXtmList.contains(rissComplete.paperXtm)){
+            complementPaperXtmList.remove(rissComplete.paperXtm);
+          }
+          List<RissImages> image = List();
+          if(rissComplete.signImagePath!=null && rissComplete.signImagePath.length>0){
+            RissImages rissImages = RissImages();
+            rissImages.isUpload=false;
+            rissImages.path = rissComplete.signImagePath;
+            image.add(rissImages);
+            rissComplete.signImagePath="";
+          }
+          rissComplete.image?.forEach((element) {
+            image.add(element);
+          });
+          rissComplete.image=null;
+          ResultData result = await HttpManager.getInstance().uploadPictures(Address.UploadTask_URL, rissComplete.toJson(), image);
+          Map<String, dynamic> json = jsonDecode(result.data);
+          if (json['code'] != 200) {
+            isUploadSuccess = false;
+            await CommUtils.showDialog(context, "提示", result.data, false, okOnPress: () {});
+            break;
+          } else {
+            isUploadSuccess = true;
+            RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
+            RissComplete rissComplete = await rissCompleteProvider.getRissById(json['data']);
+            rissComplete.isUpload="1";
+            rissCompleteProvider.update(rissComplete);
+            RissProvider rissProvider = RissProvider();
+            Riss riss = await rissProvider.getRissById(json['data']);
+            riss.image.forEach((element) {
+              element.isUpload=true;
+            });
+            await rissProvider.update(riss, false);
+            if(mUploadCount<mTotalCount){
+              mUploadCount++;
+              String formatNum = CommUtils.formatNum(mUploadCount/mTotalCount, 4);
+              progressValue = double.parse(formatNum);
+            }
+          }
+      }
+    }
+    String des = "";
+    for(int i =0;i<complementPaperXtmList.length;i++){
+      PaperProvider paperProvider = PaperProvider();
+      Paper paper = await paperProvider.getPaperById(complementPaperXtmList[i]);
+      if(des.length==0){
+        des = paper.description;
+      }else{
+        des += ","+paper.description;
+      }
+    }
+    mButtonStr = "重新上传";
+    if((signPapers.length==0 && mRissCompleteList.length>0) || des.length>0) {
+      await CommUtils.showDialog(context, "提示", "<$des>未签名,请签名后上传！", false,okOnPress: (){});
+    }else if(isUploadSuccess) {
       await CommUtils.showDialog(context, "提示", "上传成功！", false,okOnPress: (){});
     }
+    setState(() {
+
+    });
   }
 
 

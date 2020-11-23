@@ -4,7 +4,7 @@ description: A new Flutter application.
 publish_to: 'none'
 
 #  flutter build apk --build-name=1.00.02 --build-number=3
-version: 1.00.05+1
+version: 1.00.03+1
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -94,6 +94,8 @@ dependencies:
   flutter_slidable: ^0.5.4
   # app 升级
   flutter_app_upgrade: ^1.1.0
+  # 保存图片
+  image_gallery_saver : ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

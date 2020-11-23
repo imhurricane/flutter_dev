@@ -274,20 +274,23 @@ class HomeItemPageState extends State<HomeItemPage> with RouteAware{
                                 alignment: Alignment.topCenter,
                               ),
                               if(entryModels[index].id == "task_upload" && mRissCompleteList.length>0)
-                              Align(
-                                alignment: Alignment.topRight,
-                                  child: Container(
-                                    width: 14,
-                                    height: 14,
+                              Padding(
+                                padding: const EdgeInsets.only(top:4.0,right: 4.0),
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                    child: Container(
+                                      width: 14,
+                                      height: 14,
 //                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                                      border: Border.all(color: Colors.red),
-                                    ),
-                                    child: Container(),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                                        border: Border.all(color: Colors.red),
+                                      ),
+                                      child: Container(),
 //                                    Text(mRissCompleteList.length.toString()+"",style: TextStyle(color: Colors.white,fontSize: 12),),
-                                  )),
+                                    )),
+                              ),
                             ],
                           ),
                         ),

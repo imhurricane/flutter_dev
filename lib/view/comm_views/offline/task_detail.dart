@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dev/comm/comm_utils.dart';
 import 'package:flutter_dev/comm/storage_utils.dart';
 import 'package:flutter_dev/router/route_util.dart';
+import 'package:flutter_dev/view/comm_views/components/sign_page.dart';
 import 'package:flutter_dev/view/comm_views/components/spinner.dart';
 import 'package:flutter_dev/view/comm_views/components/task_check_view.dart';
 import 'package:flutter_dev/view/comm_views/moudel/selects.dart';
@@ -43,7 +44,6 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
   List<Selects> mEquipmentSelects;
 
   List<Riss> mRissList;
-  List<Selects> mRissSelects;
 
   CurrentCheckInfo mCheckInfo;
 
@@ -65,8 +65,6 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
 
     mEquipmentSelects = List();
     mEquPosition = 0;
-
-    mRissSelects = List();
 
     mCheckInfo = CurrentCheckInfo();
     initTaskData();
@@ -91,6 +89,32 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
               },
               icon: Icon(Icons.arrow_back_ios),
             ),
+            actions: [
+              IconButton(
+                padding: const EdgeInsets.all(8.0),
+                icon: Icon(Icons.assignment),
+                onPressed: () async{
+                  RissCompleteProvider provider = RissCompleteProvider();
+                  List<RissComplete> allRiss = await provider.getRissByPaperId(mPaperList[mPaperPosition].xtm);
+                  bool flag = false;
+                  String rissXtm = "";
+                  for (int i = 0; i < allRiss.length; i++) {
+                    if (allRiss[i].havemesure == "1" ||
+                        allRiss[i].activemesure == "1" ||
+                        allRiss[i].inactivemesure == "1") {
+                      flag = true;
+                      rissXtm = allRiss[i].xtm;
+                      break;
+                    }
+                  }
+                  if(flag){
+                    RouteUtils.pushPage(context, SignApp(mRissXtm: rissXtm,mPaperXtm: mPaperList[mPaperPosition].xtm,));
+                  }else{
+                    CommUtils.showDialog(context, "提示", "请先检查排查项", false,okOnPress: (){});
+                  }
+                },
+              ),
+            ],
           ),
           body: Container(
             padding: const EdgeInsets.all(4.0),
@@ -204,7 +228,11 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
   buildRissItem(index) {
     return FlatButton(
       onPressed: (){
-        RouteUtils.pushPage(context, AbnormalPhenomena(mRiss: mRissList[index],));
+        if(mRissList[index].havemesure=="1"||mRissList[index].activemesure=="1"||mRissList[index].inactivemesure=="1"){
+          RouteUtils.pushPage(context, AbnormalPhenomena(mRiss: mRissList[index],));
+        }else{
+          CommUtils.showDialog(context, "提示", "请选择检查项后进入", false,okOnPress: (){});
+        }
       },
       child: Container(
         decoration: BoxDecoration(
@@ -491,6 +519,7 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
     rissComplete.inactivemesure=riss.inactivemesure;
     rissComplete.activemesure=riss.activemesure;
     rissComplete.havemesure=riss.havemesure;
+    rissComplete.paperXtm=mPaperList[mPaperPosition].xtm;
     rissComplete.checkData=DateUtil.formatDate(DateTime.now(), format: "yyyy-MM-dd HH:mm:ss");;
     rissComplete.isUpload="0";
     rissComplete.yhXtm=user['yhxtm'];
@@ -558,6 +587,9 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
   void didPopNext() async{
     super.didPopNext();
     // 当从其他页面返回当前页面时出发此方法
+    PaperProvider paperProvider = PaperProvider();
+    mPaperList =
+    await paperProvider.getPaperByParentId(mTaskList[mTaskPosition].xtm);
     await initRissData();
   }
 
