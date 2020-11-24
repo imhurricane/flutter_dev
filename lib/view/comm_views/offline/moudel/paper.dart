@@ -89,7 +89,7 @@ class PaperProvider extends BaseDbProvider {
 
   //根据id查询
   Future<Paper> getPaperById(String id) async {
-    var mapList = await selectPaperById(id); // Get 'Map List' from database
+    List mapList = await selectPaperById(id); // Get 'Map List' from database
     var user = Paper.fromJson(mapList[0]);
     return user;
   }

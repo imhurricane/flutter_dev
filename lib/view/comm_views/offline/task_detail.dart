@@ -229,7 +229,7 @@ class TaskDetailPageState extends State<TaskDetailPage> with RouteAware{
     return FlatButton(
       onPressed: (){
         if(mRissList[index].havemesure=="1"||mRissList[index].activemesure=="1"||mRissList[index].inactivemesure=="1"){
-          RouteUtils.pushPage(context, AbnormalPhenomena(mRiss: mRissList[index],));
+          RouteUtils.pushPage(context, AbnormalPhenomena(mRiss: mRissList[index],mPaerXtm: mPaperList[mPaperPosition].xtm,));
         }else{
           CommUtils.showDialog(context, "提示", "请选择检查项后进入", false,okOnPress: (){});
         }

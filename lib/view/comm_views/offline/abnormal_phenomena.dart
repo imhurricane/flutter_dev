@@ -19,9 +19,11 @@ import 'moudel/riss_complete.dart';
 
 class AbnormalPhenomena extends StatefulWidget {
   final Riss mRiss;
+  final String mPaerXtm;
 
   AbnormalPhenomena({
     this.mRiss,
+    this.mPaerXtm
   });
 
   @override
@@ -274,6 +276,7 @@ class AbnormalPhenomenaState extends State<AbnormalPhenomena> {
     rissComplete.isUpload="0";
     rissComplete.yhXtm=loginUser.yhxtm;
     rissComplete.image=widget.mRiss.image;
+    rissComplete.paperXtm=widget.mPaerXtm;
     RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
     await rissCompleteProvider.insertRiss(rissComplete);
     await CommUtils.showDialog(context, "提示", "保存成功", false,okOnPress: (){});
