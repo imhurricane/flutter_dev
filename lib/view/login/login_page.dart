@@ -129,7 +129,7 @@ class LoginPageState extends State<LoginPage>
       top: 0,
       bottom: 0,
       child: Image.asset(
-        "resources/images/background.jpg",
+        "resources/images/background.png",
         fit: BoxFit.fill,
       ),
     );
@@ -138,7 +138,7 @@ class LoginPageState extends State<LoginPage>
   buildBlurWidget() {
     return InkWell(
       child: Container(
-        color: Color.fromARGB(150, 100, 100, 100),
+        color: Color.fromARGB(100, 40, 40, 40),
       ),
       onTap: () {
         userFocusNode.unfocus();
@@ -207,24 +207,24 @@ class LoginPageState extends State<LoginPage>
               padding: EdgeInsets.only(right: 14),
               ///圆角矩形裁切
               child: ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(22)),
+                borderRadius: BorderRadius.all(Radius.circular(17)),
                 child: Image.asset(
                   "resources/images/logo.png",
-                  width: 44,
-                  height: 44,
+                  width: 34,
+                  height: 34,
                 ),
               ),
             ),
-
+            Image.asset("resources/images/title.png",height: 22,),
             ///颐达科技
-            Text(
-              "安全双控系统",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  ///引用圆滑的自定义字体
-                  fontFamily: 'UniTortred'),
-            ),
+//            Text(
+//              "安全双控系统",
+//              style: TextStyle(
+//                  fontSize: 18,
+//                  color: Colors.white,
+//                  ///引用圆滑的自定义字体
+//                  fontFamily: 'UniTortred'),
+//            ),
           ],
         ),
       ),

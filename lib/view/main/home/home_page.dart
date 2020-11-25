@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
@@ -12,9 +11,9 @@ class MainHomePage extends StatefulWidget {
   }
 }
 
-class MainHomePageState extends State<MainHomePage>{
+class MainHomePageState extends State<MainHomePage> {
   List<Widget> bodyPageList = [];
-  List<String> imageList = ["img0.jpg", "img1.jpg", "img2.jpg", "img3.jpg"];
+  List<String> imageList = ["img0.jpg", "img1.jpg"];
 
   @override
   void initState() {
@@ -106,7 +105,7 @@ class MainHomePageState extends State<MainHomePage>{
       height: 200,
       child: Swiper(
         pagination: new SwiperPagination(),
-        itemCount: 4,
+        itemCount: 2,
         itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 200,

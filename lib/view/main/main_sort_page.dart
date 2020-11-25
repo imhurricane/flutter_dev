@@ -23,7 +23,7 @@ class MainSortPageState extends State<MainSortPage>
     "程序感言",
     "移动算法"
   ];
-  List<String> imageList = ["img0.jpg", "img1.jpg", "img2.jpg", "img3.jpg"];
+  List<String> imageList = ["img0.jpg", "img1.jpg"];
   TabController mTabController;
   List<Widget> bodyPageList = [];
 

@@ -15,7 +15,6 @@ class HomeItemPageSort extends StatefulWidget {
 }
 
 class HomeItemPageSortState extends State<HomeItemPageSort> {
-//  List<String> imageList = ["img0.jpg", "img1.jpg", "img2.jpg", "img3.jpg"];
   RefreshController mRefreshController = new RefreshController();
   ClassicFooter footer = new ClassicFooter();
 

@@ -34,7 +34,7 @@ class GuidePageState extends State<GuidePage> {
                   top: 0,
                   right: 0,
                   child: Image.asset(
-                    "resources/images/img3.jpg",
+                    "resources/images/img0.jpg",
                     fit: BoxFit.fill,
                   ),
                 ),

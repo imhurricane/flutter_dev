@@ -89,34 +89,13 @@ class IndexPageState extends State<IndexPage> {
                   width: 50,
                   height: 50,
                   child: CircularProgressIndicator(
+                    backgroundColor: Colors.white,
+                    strokeWidth: 2.0,
+                    valueColor: AlwaysStoppedAnimation(Colors.lightBlueAccent),
                     value: (5.0 - mTick) / 5.0,
                   ),
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 100,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ClipOval(
-                  child: Image.asset(
-                    "resources/images/logo.png",
-                    width: 32,
-                    height: 32,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                SizedBox(
-                  width: 15,
-                ),
-                Text(
-                  "安全生产创文明",
-                )
-              ],
             ),
           ),
         ],
@@ -130,7 +109,7 @@ class IndexPageState extends State<IndexPage> {
       right: 0,
       top: 0,
       bottom: 0,
-      child: Image.asset("resources/images/splash.jpg", fit: BoxFit.fill),
+      child: Image.asset("resources/images/splash.png", fit: BoxFit.fill),
     );
   }
 
@@ -146,15 +125,4 @@ class IndexPageState extends State<IndexPage> {
     );
   }
 
-  buildCenterProgress() {
-    return Positioned(
-      child: Center(
-        child: SizedBox(
-          width: 50,
-          height: 50,
-          child: CircularProgressIndicator(),
-        ),
-      ),
-    );
-  }
 }

@@ -6,6 +6,6 @@
     <item>
         <bitmap
             android:gravity="fill"
-            android:src="@mipmap/timg" />
+            android:src="@mipmap/splash" />
     </item>
 </layer-list>

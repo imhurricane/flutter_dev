@@ -36,7 +36,6 @@ class HomeItemPage extends StatefulWidget {
 }
 
 class HomeItemPageState extends State<HomeItemPage> with RouteAware{
-//  List<String> imageList = ["img0.jpg", "img1.jpg", "img2.jpg", "img3.jpg"];
   RefreshController mRefreshController = new RefreshController();
   ClassicFooter footer = new ClassicFooter();
   List<ItemHome> itemHomes = new List();
@@ -128,9 +127,9 @@ class HomeItemPageState extends State<HomeItemPage> with RouteAware{
     if (itemHomes != null && itemHomes.length > 0) {
       return Container(
         height: MediaQuery.of(context).size.height,
-//      padding: EdgeInsets.all(10),
-        alignment: Alignment.center,
+
         color: Colors.grey[100],
+        alignment: Alignment.center,
         child: SmartRefresher(
           enablePullDown: true,
           enablePullUp: false,
