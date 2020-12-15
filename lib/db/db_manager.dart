@@ -4,15 +4,16 @@ class DbManager {
 
   static const _VERSION=1;
 
-  static const _DBNAME = "test.db";
+  static const _DBNAME = "database.db";
 
   static Database _database;
 
   ///初始化
   static init() async {
     var databasesPath=await getDatabasesPath();
-    String path = databasesPath + _DBNAME;
-    _database=await openDatabase(path,version: _VERSION,
+
+    String path = databasesPath +"/"+ _DBNAME;
+    _database = await openDatabase(path,version: _VERSION,
       readOnly: false,      //   是否只读
       singleInstance: true, //   是否单例
       // 第一个被调用的可选回调 配置数据库使用SQL语句配置

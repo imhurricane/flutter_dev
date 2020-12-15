@@ -25,7 +25,7 @@ class CommUtils {
         btnOkText: "确定",
         btnCancelText: "取消",
         dismissOnTouchOutside:false,
-      )..show();
+      ).show();
     } else {
       AwesomeDialog(
         context: context,
@@ -38,7 +38,7 @@ class CommUtils {
         btnOkText: "确定",
         btnOkColor: Colors.lightBlue,
         dismissOnTouchOutside:false,
-      )..show();
+      ).show();
     }
   }
 

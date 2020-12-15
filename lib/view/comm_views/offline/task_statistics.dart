@@ -139,41 +139,43 @@ class StatisticsPageState extends State<StatisticsPage>  with RouteAware{
     mEquipmentComplementCount = 0;
     mRissTotalCount = 0;
     mRissComplementCount = 0;
-    PaperProvider paperProvider = PaperProvider();
-    EquipmentProvider equipmentProvider = EquipmentProvider();
-    RissProvider rissProvider = RissProvider();
-    List<Paper> paperList =
-    await paperProvider.getPaperByParentId(mTaskList[mPosition].xtm);
-    mPaperTotalCount = paperList.length;
-    for(int i=0;i<paperList.length;i++){
-      List<Equipment> equList = await equipmentProvider.getEquipmentByParentId(paperList[i].xtm);
-      mEquipmentTotalCount += equList.length;
-      int equipmentComplementCount = 0;
-      for(int j=0;j<equList.length;j++){
-        List<Riss> rissList = await rissProvider.getRissByParentId(equList[j].xtm);
-        mRissTotalCount += rissList.length;
-        int rissComplementCount = 0;
-        rissList.forEach((element) {
-          if(element.inactivemesure == "1" || element.activemesure == "1" || element.havemesure == "1"){
-            mRissComplementCount++;
-            rissComplementCount++;
+    if(mTaskList.length>0){
+      PaperProvider paperProvider = PaperProvider();
+      EquipmentProvider equipmentProvider = EquipmentProvider();
+      RissProvider rissProvider = RissProvider();
+      List<Paper> paperList =
+      await paperProvider.getPaperByParentId(mTaskList[mPosition].xtm);
+      mPaperTotalCount = paperList.length;
+      for(int i=0;i<paperList.length;i++){
+        List<Equipment> equList = await equipmentProvider.getEquipmentByParentId(paperList[i].xtm);
+        mEquipmentTotalCount += equList.length;
+        int equipmentComplementCount = 0;
+        for(int j=0;j<equList.length;j++){
+          List<Riss> rissList = await rissProvider.getRissByParentId(equList[j].xtm);
+          mRissTotalCount += rissList.length;
+          int rissComplementCount = 0;
+          rissList.forEach((element) {
+            if(element.inactivemesure == "1" || element.activemesure == "1" || element.havemesure == "1"){
+              mRissComplementCount++;
+              rissComplementCount++;
+            }
+          });
+          if(rissComplementCount == rissList.length){
+            mEquipmentComplementCount++;
+            equipmentComplementCount++;
           }
-        });
-        if(rissComplementCount == rissList.length){
-          mEquipmentComplementCount++;
-          equipmentComplementCount++;
+        }
+        if(equipmentComplementCount == equList.length){
+          mPaperComplementCount++;
         }
       }
-      if(equipmentComplementCount == equList.length){
-        mPaperComplementCount++;
+      if(mPaperComplementCount == mPaperTotalCount){
+        mTaskStatus = "已完成";
+      }else if(mPaperComplementCount > 0){
+        mTaskStatus = "部分完成";
+      }else{
+        mTaskStatus = "未完成";
       }
-    }
-    if(mPaperComplementCount == mPaperTotalCount){
-      mTaskStatus = "已完成";
-    }else if(mPaperComplementCount > 0){
-      mTaskStatus = "部分完成";
-    }else{
-      mTaskStatus = "未完成";
     }
     setState(() {
 
@@ -190,8 +192,10 @@ class StatisticsPageState extends State<StatisticsPage>  with RouteAware{
     mTaskSelects.forEach((element) {
       element.isChecked=false;
     });
-    mTaskSelects[mPosition].isChecked=true;
-    await initStatistics();
+    if(mTaskSelects.length>0){
+      mTaskSelects[mPosition].isChecked=true;
+      await initStatistics();
+    }
     setState(() {
 
     });
@@ -206,8 +210,10 @@ class StatisticsPageState extends State<StatisticsPage>  with RouteAware{
     mTaskSelects.forEach((element) {
       element.isChecked=false;
     });
-    mTaskSelects[mPosition].isChecked=true;
-    await initStatistics();
+    if(mTaskSelects.length>0){
+      mTaskSelects[mPosition].isChecked=true;
+      await initStatistics();
+    }
     setState(() {
 
     });

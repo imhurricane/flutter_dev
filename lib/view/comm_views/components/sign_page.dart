@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dev/comm/comm_utils.dart';
+import 'package:flutter_dev/logger/logger.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/paper.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss_complete.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
@@ -104,40 +105,42 @@ class SignAppState extends State<SignApp> {
   }
 
   setRenderedImage(BuildContext context) async {
-    ui.Image renderedImage = await signatureKey.currentState.rendered; // 转成图片
-    setState(() {
-      image = renderedImage;
-    });
-    Directory appDocDirs = await getExternalStorageDirectory();
-    Directory directory = await Directory('${appDocDirs.path}/Sign').create();
-    var pngBytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    final imageFile =
-        File(path.join(directory.path, 'sign_${widget.mPaperXtm}.png'));
-    imageFile.writeAsBytesSync(pngBytes.buffer.asInt8List());
+    try{
+      LogUtil.init(isDebug: true,tag: "SaveSingPicture");
+      ui.Image renderedImage = await signatureKey.currentState.rendered; // 转成图片
+      setState(() {
+        image = renderedImage;
+      });
+      Directory appDocDirs = await getExternalStorageDirectory();
+      Directory directory = await Directory('${appDocDirs.path}/Sign').create();
+      var pngBytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      final imageFile =
+      File(path.join(directory.path, 'sign_${widget.mPaperXtm}.png'));
+      imageFile.writeAsBytesSync(pngBytes.buffer.asInt8List());
 
-    final result = await ImageGallerySaver.saveImage(
-      Uint8List.fromList(imageFile.readAsBytesSync()),
-    );
-    print('result:' + imageFile.path.toString());
+      final result = await ImageGallerySaver.saveImage(
+        Uint8List.fromList(imageFile.readAsBytesSync()),
+      );
+      if (result['isSuccess']) {
+        RissComplete rissComplete = RissComplete();
+        rissComplete.signImagePath = '${imageFile.path}';
+        rissComplete.isUpload = "0";
+        rissComplete.xtm = widget.mRissXtm;
+        RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
+        await rissCompleteProvider.updateWithSignImage(rissComplete);
 
-    RissComplete rissComplete = RissComplete();
-    rissComplete.signImagePath = '${imageFile.path}';
-    rissComplete.isUpload = "0";
-    rissComplete.xtm = widget.mRissXtm;
-    RissCompleteProvider rissCompleteProvider = RissCompleteProvider();
-    await rissCompleteProvider.updateWithSignImage(rissComplete);
-
-    PaperProvider paperProvider = PaperProvider();
-    Paper paper = Paper();
-    paper.xtm=widget.mPaperXtm;
-    paper.isSignImage=true;
-    paperProvider.updateWithSign(paper);
-
-
-    if (result['isSuccess']) {
-      CommUtils.showDialog(context, "提示", "保存成功！", false, okOnPress: () {});
-    } else {
-      CommUtils.showDialog(context, "提示", "保存失败！", false, okOnPress: () {});
+        PaperProvider paperProvider = PaperProvider();
+        Paper paper = Paper();
+        paper.xtm=widget.mPaperXtm;
+        paper.isSignImage=true;
+        paperProvider.updateWithSign(paper);
+        CommUtils.showDialog(context, "提示", "保存成功！", false, okOnPress: () {});
+      } else {
+        LogUtil.v(result);
+        CommUtils.showDialog(context, "提示", "保存失败！", false, okOnPress: () {});
+      }
+    }catch(e){
+      LogUtil.v(e.toString());
     }
   }
 }

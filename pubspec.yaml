@@ -4,7 +4,7 @@ description: A new Flutter application.
 publish_to: 'none'
 
 #  flutter build apk --build-name=1.00.02 --build-number=3
-version: 1.00.06+1
+version: 1.00.09+1
 
 environment:
   sdk: ">=2.7.0 <3.0.0"

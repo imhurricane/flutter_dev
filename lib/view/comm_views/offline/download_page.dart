@@ -10,9 +10,11 @@ import 'package:flutter_dev/http/address.dart';
 import 'package:flutter_dev/http/data_helper.dart';
 import 'package:flutter_dev/http/http_manager.dart';
 import 'package:flutter_dev/http/result_data.dart';
+import 'package:flutter_dev/view/comm_views/components/form_Input_cell.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/moudel/page_info.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/equipment.dart';
+import 'package:flutter_dev/view/comm_views/offline/moudel/page_status.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/paper.dart';
 import 'package:flutter_dev/view/comm_views/offline/moudel/riss.dart';
 import 'package:flutter_dev/view/login/moudel/user.dart';
@@ -32,15 +34,18 @@ class DownloadPageState extends State<DownloadPage> {
   RefreshController mRefreshController = new RefreshController();
   ClassicFooter footer = new ClassicFooter();
   PageInfo pageInfo = PageInfo();
-
+  TextEditingController textEditingController = TextEditingController();
   List<Task> mData;
   double isDownloadComp;
-
+  bool search = false;
+  FocusNode focusNode = FocusNode();
+  PageStatus pageStatus = PageStatus.loading;
   @override
   void initState() {
     mData = List();
     pageInfo.pageNumber = 1;
     pageInfo.pageSize = 10;
+    textEditingController.text = "";
     initData();
     super.initState();
   }
@@ -52,36 +57,74 @@ class DownloadPageState extends State<DownloadPage> {
 
   Widget buildPage() {
     return Material(
-      child: Scaffold(
-        body: NestedScrollView(
-          headerSliverBuilder: (BuildContext listContext, bool flag) {
-            return [
-              SliverAppBar(
-                pinned: true,
-                title: Text("任务下载清单"),
-                centerTitle: true,
-                leading: IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: Icon(Icons.arrow_back_ios),
+      child: GestureDetector(
+        onTap: (){
+          FocusScope.of(context).requestFocus(focusNode);
+        },
+        child: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext listContext, bool flag) {
+              return [
+                SliverAppBar(
+                  pinned: true,
+                  title: !search?Text("任务下载清单"):Container(
+                      decoration: new BoxDecoration(
+                        border: Border.all(color: Colors.grey, width: 1.0), //灰色的一层边框
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all( Radius.circular(5.0)),
+                      ),
+                      alignment: Alignment.center,
+                      height: 38,
+//           padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+                      child: buildTextField(),
+                  ),
+                  centerTitle: true,
+                  leading: IconButton(
+                    onPressed: () {
+                      if(search){
+                        setState(() {
+                          search = !search;
+                        });
+                      }else{
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    icon: Icon(Icons.arrow_back_ios),
+                  ),
+                  actions: [
+                    IconButton(
+                      onPressed: (){
+                        FocusScope.of(context).requestFocus(focusNode);
+                        if(textEditingController.text.length>0&&search){
+                          mData.clear();
+                          pageInfo.pageNumber=1;
+                          initData();
+                        }else{
+                          setState(() {
+                            search = !search;
+                          });
+                        }
+                      },
+                      icon: Icon(Icons.search),
+                    ),
+                  ],
                 ),
+              ];
+            },
+            body: Container(
+              color: Colors.grey[200],
+              child: SmartRefresher(
+                enablePullDown: true,
+                enablePullUp: true,
+                header: WaterDropHeader(
+                  waterDropColor: Colors.blue,
+                ),
+                footer: footer,
+                controller: mRefreshController,
+                onRefresh: onRefresh,
+                onLoading: onLoading,
+                child: buildBody(),
               ),
-            ];
-          },
-          body: Container(
-            color: Colors.grey[200],
-            child: SmartRefresher(
-              enablePullDown: true,
-              enablePullUp: true,
-              header: WaterDropHeader(
-                waterDropColor: Colors.blue,
-              ),
-              footer: footer,
-              controller: mRefreshController,
-              onRefresh: onRefresh,
-              onLoading: onLoading,
-              child: buildBody(),
             ),
           ),
         ),
@@ -90,14 +133,22 @@ class DownloadPageState extends State<DownloadPage> {
   }
 
   buildBody() {
-    return mData.length > 0
-        ? ListView.builder(
-            itemCount: mData.length,
-            padding: EdgeInsets.all(0),
-            itemBuilder: (context, index) {
-              return buildListItem(index);
-            })
-        : PageLoading();
+    if(pageStatus==PageStatus.showData) {
+      return ListView.builder(
+          itemCount: mData.length,
+          padding: EdgeInsets.all(0),
+          itemBuilder: (context, index) {
+            return buildListItem(index);
+          });
+    } else if(pageStatus==PageStatus.loading){
+      return PageLoading();;
+    }else{
+      return Container(
+        child: Center(
+          child: Text("暂无数据"),
+        ),
+      );
+    }
   }
 
   buildListItem(int index) {
@@ -127,7 +178,7 @@ class DownloadPageState extends State<DownloadPage> {
       child: Card(
         elevation: 0.0,
         child: InkWell(
-          onTap: () {},
+          onTap: () {FocusScope.of(context).requestFocus(focusNode);},
           child: Container(
             height: 100,
             padding: const EdgeInsets.all(8.0),
@@ -190,15 +241,29 @@ class DownloadPageState extends State<DownloadPage> {
       baseMap['yhxtm'] = user.yhxtm;
       baseMap['pageNumber'] = pageInfo.pageNumber;
       baseMap['pageSize'] = pageInfo.pageSize;
+      if(textEditingController.text.length>0){
+        baseMap['description'] = textEditingController.text.trim();
+      }
       ResultData result = await HttpManager.getInstance()
           .get(Address.DownloadTaskList_URL, baseMap);
       if (result.code != 200) {
         CommUtils.showDialog(context, "提示", result.data, false, okOnPress: () {});
       } else {
         List<dynamic> json = jsonDecode(result.data);
+        if(json.length==0){
+          mRefreshController.loadComplete();
+          mRefreshController.loadNoData();
+        }else{
+          mRefreshController.loadComplete();
+        }
         json.forEach((element) {
           mData.add(Task.fromJson(element));
         });
+      }
+      if(mData.length>0){
+        pageStatus=PageStatus.showData;
+      }else{
+        pageStatus=PageStatus.noThing;
       }
       setState(() {});
     }
@@ -221,7 +286,6 @@ class DownloadPageState extends State<DownloadPage> {
     baseMap['taskXtm'] = taskXtm;
     ResultData result =
         await HttpManager.getInstance().get(Address.DownloadTask_URL, baseMap);
-    print('');
     if (result.code != 200) {
       Navigator.of(context).pop();
       CommUtils.showDialog(context, "提示", result.data, false, okOnPress: () {});
@@ -270,12 +334,12 @@ class DownloadPageState extends State<DownloadPage> {
   onLoading() async {
     pageInfo.pageNumber++;
     await initData();
-    mRefreshController.loadComplete();
   }
 
   onRefresh() async {
     pageInfo.pageNumber = 1;
     mData.clear();
+    textEditingController.text = "";
     await initData();
     mRefreshController.refreshCompleted();
     mRefreshController.loadComplete();
@@ -293,5 +357,35 @@ class DownloadPageState extends State<DownloadPage> {
     }else{
       onDownloadTask(taskXtm);
     }
+  }
+
+  buildTextField() {
+    return TextField(
+      maxLines: 1,
+      controller: textEditingController,
+      decoration: InputDecoration(
+        hintText: '请输入搜索信息',
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 4.0,horizontal: 4.0),
+        hintStyle: TextStyle(color: Color(0xff9e51ff)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          //未选中时候的颜色
+          borderRadius: BorderRadius.circular(5.0),
+          borderSide: BorderSide(
+            color: Colors.white,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          //选中时外边框颜色
+          borderRadius: BorderRadius.circular(5.0),
+          borderSide: BorderSide(
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
   }
 }
