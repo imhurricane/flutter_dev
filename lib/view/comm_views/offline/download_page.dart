@@ -24,13 +24,12 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'moudel/task.dart';
 
 class DownloadPage extends StatefulWidget {
+
   @override
-  State<StatefulWidget> createState() {
-    return DownloadPageState();
-  }
+  _DownloadPageState createState() => _DownloadPageState();
 }
 
-class DownloadPageState extends State<DownloadPage> {
+class _DownloadPageState extends State<DownloadPage> {
   RefreshController mRefreshController = new RefreshController();
   ClassicFooter footer = new ClassicFooter();
   PageInfo pageInfo = PageInfo();
