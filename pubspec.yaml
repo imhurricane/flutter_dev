@@ -80,7 +80,7 @@ dependencies:
   # 加载框 https://pub.flutter-io.cn/packages/oktoast#-readme-tab-
   oktoast: 2.3.1+1
   #下拉选择筛选
-  dropdown_search: ^0.4.4
+#  dropdown_search: 0.4.4
   #select_days_week: ^0.1.1
   # 源码已修改  升级请谨慎  去掉了下划线
   multiple_select: 0.1.23
