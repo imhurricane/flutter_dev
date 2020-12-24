@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dev/logger/Logger_base.dart';
+import 'package:flutter_dev/logger/logger.dart';
 import 'package:flutter_dev/view/comm_views/dropdown/dropdown_search.dart';
 import 'package:flutter_dev/view/comm_views/moudel/selects.dart';
 
@@ -68,9 +70,11 @@ class _FromSpinnerSearchState extends State<FromSpinnerSearch> {
                 popupBackgroundColor: Colors.white,
 //        isFilteredOnline: true,
                 showClearButton: false,
-//                showSearchBox: true,
-
+                showSearchBox: true,
                 enabled: true,//只读
+                itemAsString: (select){
+                  return select.desc;
+                },
 //                autoFocusSearchBox: false,//默认打开键盘
                 showDropDownButton: false,
                 dropdownBuilderSupportsNullItem: true,
