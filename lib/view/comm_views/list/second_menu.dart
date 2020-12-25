@@ -136,17 +136,15 @@ class SecondMenuState extends State<SecondMenu> {
                               alignment: Alignment.center,
                             ),
                           ),
-                          Expanded(
-                            child: Center(
-                              child: Text(
-                                entryModels[index].title.length>5?(entryModels[index].title.substring(0,4)+"··"):entryModels[index].title,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                          Center(
+                            child: Text(
+                              entryModels[index].title.length>5?(entryModels[index].title.substring(0,4)+"··"):entryModels[index].title,
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
