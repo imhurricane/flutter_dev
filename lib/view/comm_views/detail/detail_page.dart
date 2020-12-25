@@ -424,6 +424,8 @@ class DetailPageState extends State<DetailPage>{
       titleContentSpaces: titleContentSpaces,
       textWidget: FromDropDownSearch(
         selects: item.selects,
+        showDropDownButton: true,
+        showDropClearButton: false,
         selectCallBack: (select){
           setState(() {
             for(int i=0;i<item.selects.length;i++){

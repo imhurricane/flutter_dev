@@ -34,7 +34,7 @@ class CommBottomAction {
 
   static getImageFromCamera() async {
     PickedFile image = await ImagePicker().getImage(source: ImageSource.camera,imageQuality: 50);
-    result=image.path;
+    result=image?.path;
   }
 
   static getImage() async{
