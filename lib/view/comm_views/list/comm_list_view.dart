@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter_dev/comm/storage_utils.dart';
+import 'package:flutter_dev/logger/logger.dart';
 import 'package:flutter_dev/router/route_util.dart';
 import 'package:flutter_dev/view/comm_views/components/page_loading.dart';
 import 'package:flutter_dev/view/comm_views/detail/detail_page.dart';
@@ -297,6 +298,10 @@ class CommListViewState extends State<CommListView> {
     }else{
 //      CommUtils.showDialog(context, "提示", "登录信息过期,请重新登录", false,
 //          okOnPress: () {});
+    }
+
+    for(int i = 0;i<viewItems.length;i++){
+      print('viewItems:'+viewItems[i].toJson().toString());
     }
     setState(() {});
   }

@@ -50,7 +50,11 @@ class ItemListViewContent {
   ItemListViewContent({this.subTitle, this.describe, this.id, this.title});
 
   ItemListViewContent.fromJson(Map<String, dynamic> json) {
-    subTitle = json['subTitle'];
+    if(json['subTitle'] != null){
+      subTitle = json['subTitle'].toString();
+    }else {
+      subTitle = json['subTitle'];
+    }
     describe = json['describe'];
     id = json['id'];
     note = json['note'];
