@@ -22,7 +22,7 @@ class HttpManager {
   HttpManager._internal({String baseUrl}) {
     if (null == _dio) {
       _dio = new Dio(
-          new BaseOptions(baseUrl: Address.BASE_URL, connectTimeout: 50000,receiveTimeout: 300000,sendTimeout: 300000));
+          new BaseOptions(baseUrl: Address.BASE_URL, connectTimeout: 5000,receiveTimeout: 300000,sendTimeout: 300000));
       _dio.interceptors.add(new LogsInterceptors());
       _dio.interceptors.add(new ResponseInterceptors());
     }
